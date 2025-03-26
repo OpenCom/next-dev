@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
-import Logo from "@/app/components/brand/Logo";
+
+import ExpenseForm from '@/components/spese/ExpenseForm';
+import SidebarForm from "@/components/global/SidebarForm";
+
+import { SidebarProvider } from "@/context/SidebarContext";
+import MainContent from "@/components/MainContent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,29 +28,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <html lang="it">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <header>
-          <section className="max-w-7xl p-2 mx-auto flex flex-row items-center gap-2 justify-between">
-            <Logo />
-            <nav>
-              <ul className="flex flex-row list-none gap-4 text-sm text-slate-600 *:hover:underline">
-                <li>Menu</li>
-                <li>Profilo</li>
-                <li>Impostazioni</li>
-              </ul>
-            </nav>
-          </section>
-          <section className="p-1 py-2 border-y border-slate-200 bg-slate-50">
-            <div className="max-w-7xl mx-auto flex flex-row items-center gap-2 justify-between font-semibold text-slate-700 font-[family-name:var(--font-geist-mono)]">
-              <h1>TITOLO PAGINA</h1>
-            </div>
-          </section>
-        </header>
-        <main className="w-full h-full bg-slate-100">{children}</main>
+        <div className="w-full flex flex-col md:flex-row min-h-svh bg-slate-100">
+          <SidebarProvider>
+            <SidebarForm>
+              <ExpenseForm />
+            </SidebarForm>
+            <MainContent pageTitle="Test UI">
+              {children}
+            </MainContent>
+          </SidebarProvider>
+        </div>
         <footer className="text-center p-4 w-full bg-slate-200 text-slate-600 border-t border-slate-300">
           <p>PDM Power by OpenCom - Copyright © 2014-2025</p>
         </footer>

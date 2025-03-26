@@ -1,3 +1,4 @@
+"use client"
 import { UserType } from '@/types/db';
 import React, { useState, type FormEvent } from 'react';
 import cn from "@/lib/cn";
@@ -11,9 +12,9 @@ const ExpenseForm = () => {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch('/api/user'); //?q=SELECT%20*%20FROM%20%user%60
+      const res = await fetch('/api/users'); //?q=SELECT%20*%20FROM%20%user%60
       const data = await res.json();
-      setUsers(data);
+      setUsers(data.rows);
     };
 
     fetchData();
@@ -75,8 +76,8 @@ const ExpenseForm = () => {
             Seleziona dipendente
           </option>
           {users.map((user) => (
-            <option key={user.id_user} value={user.id_user}>
-              {user.name}
+            <option className='capitalize' key={user.id} value={user.id}>
+              {user.nome} {user.cognome}
             </option>
           ))}
         </select>

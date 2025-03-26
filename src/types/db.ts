@@ -1,26 +1,19 @@
 export type SpeseType = {
     id: number
-    costo: number
-    motivo: string
-    pagata_da: number
-}
-
-export type DipendenteType = {
-    id: number
-    nome: string
-    email: string
+    id_trasferta: number
+    categoria_spesa: string
+    quanto: number | string
+    quando: string
+    motivo?: string
+    fatta_da: number
 }
 
 
 export type UserType = {
-    id_user: number
-	name: string
-    surname: string
-    user: string
-    password: string
+    id: number
+	nome: string
+    cognome: string
+    dipartimento: string
+    ruolo: string
     email: string
-    id_usertype: number
-    id_partner: number
-    id_student: number
-    deleted: number
 }

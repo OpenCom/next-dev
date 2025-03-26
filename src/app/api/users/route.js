@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import pool from '@/lib/db';
  
 export async function GET() {
-  let conn: any;
+  let conn;
   try {
     conn = await pool.getConnection();
-    const [rows] = await conn.query('SELECT * FROM `spesa` ORDER BY `quando` DESC');
+    const [rows] = await conn.query('SELECT * FROM `users`');
     return NextResponse.json({rows});
   } catch (err) {
     if (!(err instanceof Error)) {
@@ -16,3 +16,5 @@ export async function GET() {
     conn.release();  // Libera la connessione
   }
 }
+
+
