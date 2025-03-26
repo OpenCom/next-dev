@@ -12,9 +12,7 @@ export async function GET() {
       throw err;
     }
     return NextResponse.json({ error: 'Database query failed', details: err.message });
-  } finally {
-    conn.release();  // Libera la connessione
-  }
+  } 
 }
 
 

@@ -6,6 +6,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Metodo non consentito" });
   }
@@ -19,6 +20,7 @@ export default async function handler(
   }
 
   let conn: any;
+
   try {
     conn = await pool.getConnection();
     const [rows] = await conn.query(`SELECT * FROM users WHERE email = ?`, [
@@ -32,7 +34,8 @@ export default async function handler(
     }
     const user = rows[0];
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = password === user.passowrd; //await bcrypt.compare(password, user.password);
+    
     if (!isPasswordValid) {
       const tentativiRimanenti = user.tentativi_accesso_rimasti - 1;
 
@@ -43,7 +46,7 @@ export default async function handler(
         ]);
         return res.status(401).json({
             success: false,
-            message: "Account bloccato, troppi tentativi errati. Contatta il reparto ICT.",
+            message: "Account bloccato, troppi tentativi errati.",
           });
       } else {
         // Altrimenti, aggiorna i tentativi di accesso

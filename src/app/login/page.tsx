@@ -44,6 +44,7 @@ export default function LoginPage() {
           <input
             type="email"
             value={email}
+            className="border"
             onChange={(e) => setEmail(e.target.value)}
             required
           />
@@ -52,13 +53,14 @@ export default function LoginPage() {
           <label>Password:</label>
           <input
             type="password"
+            className="border"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
         {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Login</button>
+        <button type="submit" className="border">Login</button>
       </form>
     </div>
   );
