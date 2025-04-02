@@ -50,7 +50,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch('/api/spese');
+      const res = await fetch('/api/');
       const data = await res.json();
       setSpese(data.rows);
     };

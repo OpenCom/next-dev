@@ -75,8 +75,8 @@ const ExpenseForm = () => {
           <option value="" disabled>
             Seleziona dipendente
           </option>
-          {users.map((user) => (
-            <option className='capitalize' key={user.id} value={user.id}>
+          {users.map((user, index) => (
+            <option className='capitalize' key={`${index}-user${user.id}`} value={user.id}>
               {user.nome} {user.cognome}
             </option>
           ))}
