@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import pool from "@/lib/db";
-import bcrypt from "bcrypt";
+
+import { verifyPassword } from "@/lib/auth";
+
 
 export default async function handler(
   req: NextApiRequest,
