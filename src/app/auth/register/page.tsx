@@ -3,12 +3,18 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type formDataType = {
+  email: string;
+  password: string;
+  //username: string;
+};
+
 export default function RegistrationForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<formDataType>({
     email: "",
     password: "",
-    username: ""
+    //username: ""
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,10 +41,11 @@ export default function RegistrationForm() {
         body: JSON.stringify(formData),
       });
 
+      console.log(JSON.stringify(formData));
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Errore durante la registrazione");
+        throw new Error(data.message || "Errore durante la registrazione");
       }
 
       // Registrazione completata con successo
@@ -84,7 +91,7 @@ export default function RegistrationForm() {
           />
         </div>
 
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label
             htmlFor="username"
             className="block text-gray-700 font-medium mb-2"
@@ -95,12 +102,15 @@ export default function RegistrationForm() {
             type="text"
             id="username"
             name="username"
-            value={formData.username ? formData.username : formData.email.slice(0, formData.email.indexOf('@'))}
-            onChange={handleChange}
+            value={formData.email.slice(0, formData.email.indexOf('@'))}
+            //onChange={handleChange}
+            placeholder="Username generato a partire dalla mail"
             required
+            disabled={true}
+            aria-disabled={true}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
+        </div> */}
 
         <div className="mb-4">
           <label

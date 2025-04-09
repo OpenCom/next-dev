@@ -126,6 +126,7 @@ DELIMITER ;
 CREATE VIEW user_details AS
 SELECT 
     u.id_user, 
+    d.id_dipendente,
     u.username, 
     d.email, 
     d.ruolo,

@@ -1,14 +1,15 @@
 export type DipendenteType = {
     id_dipendente: number
+    id_dipartimento: number
     nome: string
     cognome: string
+    email: string
     ruolo: 'responsabile' | 'dipendente' | 'contabile' | 'esterno'
 }
 
 export type UserType = {
     id_user: number
     username: string
-    email: string
     password_hash: string
     id_dipendente: number
     is_admin: boolean

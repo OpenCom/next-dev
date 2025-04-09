@@ -1,52 +1,58 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 import { executeQuery } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 
-export default async function GET(
-  req: NextApiRequest,
-  res: NextApiResponse
+export async function POST(
+  req: NextRequest
 ) {
 
   if (req.method !== "POST") {
     return NextResponse.json({ message: "Metodo non consentito" }, {status: 405});
   }
+  // Verifica che il Content-Type sia application/json    
+  const contentType = req.headers.get("Content-Type");
+  if (contentType !== "application/json") {
+    return NextResponse.json({ message: "Content-Type non valido" }, {status: 415});
+  }
 
-  const { email, password, dipendente_id, username } = req.body;
-
+  const { email, password } = await req.json();
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ message: "E-mail e password sono obbligatorie" });
+    return NextResponse.json({ message: "E-mail e password sono obbligatorie" }, {status: 400});
   }
 
-  if (!dipendente_id) {
-    return res
-    .status(400)
-    .json({ message: "Errore: devi essere associato a un dipendente. Usa la mail aziendale." }); // invieremo a ogni user un link con il dipendente_id già impostato.
-  }
+  const datiDipendente: any[] = await executeQuery(
+    'SELECT id_dipendente FROM dipendenti WHERE email = ?',
+    [email]
+  );
+
+    // Verifica se il dipendente è stato trovato
+    if (datiDipendente.length === 0) {
+      return NextResponse.json({ message: "Errore: devi essere associato a un dipendente. Usa la mail aziendale per registrarti." }, {status: 400});
+    }
+
+  // genero l'username a partire dalla mail aziendale
+  const username = email.slice(0, email.indexOf('@'));
+  const id_dipendente: number = datiDipendente[0].id_dipendente;
 
   const existingUsers = await executeQuery(
-    'SELECT * FROM users WHERE email = ? OR username = ? OR dipendente_id = ?',
-    [email, username, dipendente_id]
+    'SELECT * FROM user_details WHERE email = ? OR username = ? OR id_dipendente = ?',
+    [email, username, id_dipendente]
   );
 
   if (existingUsers.length > 0) {
 
-    let conflictField = '';
+    let conflictFieldText = '';
     const existingUser = existingUsers[0];
     
     if (existingUser.email === email) {
-      conflictField = 'email';
+      conflictFieldText = 'con questa e-mail';
     } else if (existingUser.username === username) {
-      conflictField = 'username';
-    } else if (existingUser.dipendente_id === dipendente_id) {
-      conflictField = 'dipendente_id';
+      conflictFieldText = 'con questo username';
+    } else if (existingUser.id_dipendente === id_dipendente) {
+      conflictFieldText = 'collegato a questo dipendente';
     }
     
-    return res.status(409).json({ 
-      error: `Un utente con questo ${conflictField} esiste già` 
-    });
+    return NextResponse.json({ message: `Un utente ${conflictFieldText} esiste già`}, {status: 409});
   }
 
   try {
@@ -55,14 +61,17 @@ export default async function GET(
     
     // Store user in database
     await executeQuery(
-      'INSERT INTO users (email, password, username, dipendente_id) VALUES (?, ?, ?, ?)',
-      [email, hashedPassword, username, dipendente_id]
+      'INSERT INTO users (password_hash, username, id_dipendente) VALUES (?, ?, ?)',
+      [hashedPassword, username, id_dipendente]
     );
-    
-    return res.status(201).json({ message: 'User created successfully' });
-  } catch (error) {
+    return NextResponse.json({ message: 'Utente creato con successo!' },{status: 200});
+  } catch (error: any) {
     console.error('Errore di registrazione:', error);
-    return res.status(500).json({ message: 'Errore in fase di registrazione. Non è stato posibile creare l\'utente.' });
+
+    if (error.sqlState === '45000') {
+      return NextResponse.json({ message: error.message || 'Errore: Il dipendente associato non esiste.' },{status: 400});
+    }
+    return NextResponse.json({ message: 'Errore in fase di registrazione. Non è stato posibile creare l\'utente.' },{status: 400});
   }
 
 }
