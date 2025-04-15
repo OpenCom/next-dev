@@ -9,3 +9,9 @@ export interface AuthContextType {
     login: (userData: AuthUserType) => void;
     logout: () => void;
   }
+
+
+export interface AuthFormDataType {
+  email: string;
+  password: string;
+};

@@ -1,23 +1,16 @@
 "use client";
-
-import { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-
-type formDataType = {
-  email: string;
-  password: string;
-  //username: string;
-};
+import { AuthFormDataType } from "@/types/auth";
 
 export default function RegistrationForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState<formDataType>({
+  const [formData, setFormData] = React.useState<AuthFormDataType>({
     email: "",
-    password: "",
-    //username: ""
+    password: ""
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;

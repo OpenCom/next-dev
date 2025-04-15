@@ -1,12 +1,16 @@
 // components/Header.tsx
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = ({ onEdit, onAdd }: { onEdit: () => void; onAdd: () => void }) => {
+
+  const {isAuthenticated, logout, login, user} = useAuth();
+
   return (
     <AppBar position="sticky">
       <Toolbar>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Dashboard Aziendale
+          PDM
         </Typography>
         <Box>
           <Button color="inherit" onClick={onEdit}>

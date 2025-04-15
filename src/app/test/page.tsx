@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState, type MouseEvent } from 'react';
-import type { SpeseType } from '@/types/db';
+import type { SpesaType } from '@/types/db';
 
 import { DataGrid, GridRowsProp, GridColDef, GridToolbarContainer, GridToolbarExport, GridRenderCellParams } from '@mui/x-data-grid';
 

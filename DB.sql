@@ -98,6 +98,7 @@ CREATE TABLE users (
     reset_token VARCHAR(100),
     reset_token_expiry DATETIME,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    tentativi_accesso_rimasti INT NOT NULL DEFAULT 5,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_dipendente) REFERENCES dipendenti(id_dipendente),
