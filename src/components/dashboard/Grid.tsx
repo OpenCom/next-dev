@@ -1,8 +1,8 @@
 "use client"
-import React, { useEffect, useState, type MouseEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { SpesaType } from '@/types/db';
-import { DataGrid, GridRowsProp, GridColDef, GridToolbarContainer, GridToolbarExport, GridRenderCellParams, GridValidRowModel } from '@mui/x-data-grid';
-
+import { GridColDef, GridToolbarContainer, GridToolbarExport, GridRenderCellParams, DataGrid, gridClasses, GridRowId, GridValidRowModel } from '@mui/x-data-grid';
+import { alpha, styled } from '@mui/material/styles';
 import Link from 'next/link';
 
 
@@ -14,9 +14,46 @@ function CustomToolbar() {
   );
 }
 
-function getRowId(row: SpesaType) {
+function getRowId(row: GridValidRowModel) {
   return row.uuid_spesa;
 }
+
+
+const ODD_OPACITY = 0.2;
+
+const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  [`& .${gridClasses.row}.even`]: {
+    backgroundColor: theme.palette.grey[200],
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+      '@media (hover: none)': {
+        backgroundColor: 'transparent',
+      },
+    },
+    '&.Mui-selected': {
+      backgroundColor: alpha(
+        theme.palette.primary.main,
+        ODD_OPACITY + theme.palette.action.selectedOpacity,
+      ),
+      '&:hover': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY +
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity,
+        ),
+        // Reset on touch devices, it doesn't add specificity
+        '@media (hover: none)': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY + theme.palette.action.selectedOpacity,
+          ),
+        },
+      },
+    },
+  },
+}));
+
 
 export default function Grid({query = 'all/0'}: {query?: string}) {
 
@@ -46,7 +83,8 @@ export default function Grid({query = 'all/0'}: {query?: string}) {
     },
   ];
 
-  function mySaveOnServerFunction(updatedRow: SpesaType){
+  function mySaveOnServerFunction(updatedRow: GridValidRowModel){
+    // Da implementare
     return updatedRow
   }
 
@@ -63,20 +101,24 @@ export default function Grid({query = 'all/0'}: {query?: string}) {
 
   return (
     <>
-        <DataGrid
+        <StripedDataGrid
           getRowId={getRowId}
+          rows={spese}
+          columns={columns}
+          loading={spese?.length === 0}
           initialState={{
             density: "compact",
           }}
-          editMode="row" 
-          rows={spese}
-          columns={columns}
-          slots={{ toolbar: CustomToolbar }}
-          processRowUpdate={(updatedRow, originalRow, {rowId: GridRowId}) =>
-            mySaveOnServerFunction(updatedRow)
-          }
           rowHeight={28}
-          onProcessRowUpdateError={(error: any)=>{throw error}}
+          // editMode="row" 
+          slots={{ toolbar: CustomToolbar }}
+          // processRowUpdate={(updatedRow, originalRow, {rowId: GridRowId}) =>
+          //   mySaveOnServerFunction(updatedRow)
+          // }
+          // onProcessRowUpdateError={(error: any)=>{throw error}}
+          getRowClassName={(params) =>
+            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+          }
         /> 
       </>
   );
