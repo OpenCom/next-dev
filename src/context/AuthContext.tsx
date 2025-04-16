@@ -1,98 +1,110 @@
-// src/context/AuthContext.tsx
+"use client";
+import type { AuthUserType, JwtPayload } from '@/types/auth';
+import React, { createContext, useState, useContext, useEffect, PropsWithChildren, useMemo } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
-import React, {
-    createContext,
-    useState,
-    useContext,
-    useEffect,
-    ReactNode,
-    useMemo,
-  } from 'react';
-  import { AuthUserType, AuthContextType } from '@/types/auth';
-  
-  // Chiave per salvare/recuperare dati da localStorage
-  const AUTH_STORAGE_KEY = 'userData';
-  
-  // Crea il contesto con un valore iniziale (o undefined per forzare l'uso del Provider)
-  const AuthContext = createContext<AuthContextType | undefined>(undefined);
-  
-  // Props per il componente Provider
-  interface AuthProviderProps {
-    children: ReactNode;
-  }
-  
-  // Componente Provider che gestirà lo stato
-  export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [user, setUser] = useState<AuthUserType | null>(null);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(true); // Inizia come true
-  
-    // Effetto per caricare lo stato dal localStorage all'avvio
-    useEffect(() => {
-      try {
-        const storedUserData = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (storedUserData) {
-          const parsedUser: AuthUserType = JSON.parse(storedUserData);
-          // Qui potresti aggiungere una validazione extra se necessario
-          setUser(parsedUser);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error("Errore nel caricare i dati utente dal localStorage:", error);
-        // Se c'è un errore, pulisci localStorage per sicurezza
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      } finally {
-        setIsLoading(false); // Fine del caricamento iniziale
+
+interface AuthContextType {
+  isAuthenticated: boolean;
+  user: AuthUserType | null;
+  isLoading: boolean;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+
+// Cookie utility per client-side
+function getCookie(name: string): string | undefined {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return undefined;
+}
+
+export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  const [user, setUser] = useState<AuthUserType | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Inizializza lo stato di autenticazione
+  useEffect(() => {
+    // Verifica presenza del token
+    const token = getCookie('userData');
+    
+    if (!token) {
+      setIsAuthenticated(false);
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      // Verifica validità del token decodificandolo
+      const decoded = jwtDecode<JwtPayload>(token);
+      const currentTime = Date.now() / 1000;
+
+      if (decoded.exp < currentTime) {
+        // Token scaduto
+        setIsAuthenticated(false);
+        setUser(null);
+      } else {
+        // Token valido, decodifica il payload
+        setUser(decoded.user);
+        setIsAuthenticated(true);
       }
-    }, []); // L'array vuoto assicura che venga eseguito solo al mount
-  
-    // Funzione per effettuare il login
-    const login = (userData: AuthUserType) => {
-      setUser(userData);
-      setIsAuthenticated(true);
-      setIsLoading(false); // Assicura che il loading sia false dopo il login
-      try {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      } catch (error) {
-        console.error("Errore nel salvare i dati utente nel localStorage:", error);
-      }
-    };
-  
-    // Funzione per effettuare il logout
-    const logout = () => {
+    } catch (error) {
+      console.error("Errore nella verifica dell'autenticazione:", error);
+      setIsAuthenticated(false);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Funzione di logout
+  const logout = async () => {
+    try {
+      // Chiama l'API di logout per rimuovere i cookie lato server
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      // Aggiorna lo stato locale
       setUser(null);
       setIsAuthenticated(false);
-      try {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      } catch (error) {
-        console.error("Errore nel rimuovere i dati utente dal localStorage:", error);
-      }
-    };
-  
-    // Memoizza il valore del contesto per evitare re-render non necessari
-    const contextValue = useMemo(
-      () => ({
-        isAuthenticated,
-        user,
-        isLoading,
-        login,
-        logout,
-      }),
-      [isAuthenticated, user, isLoading] // Dipendenze per useMemo
-    );
-  
-    return (
-      <AuthContext.Provider value={contextValue}>
-        {children}
-      </AuthContext.Provider>
-    );
-  };
-  
-  // Hook personalizzato per consumare il contesto più facilmente
-  export const useAuth = (): AuthContextType => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-      throw new Error('useAuth deve essere usato all\'interno di un AuthProvider');
+    } catch (error) {
+      console.error("Errore durante il logout:", error);
+      // Anche in caso di errore nella chiamata API, aggiorna lo stato locale
+      setUser(null);
+      setIsAuthenticated(false);
     }
-    return context;
   };
+
+  // Memoizza il valore del contesto
+  const contextValue = useMemo(
+    () => ({
+      isAuthenticated,
+      user,
+      isLoading,
+      logout
+    }),
+    [isAuthenticated, user, isLoading]
+  );
+
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Hook per usare il contesto
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth deve essere usato all\'interno di un AuthProvider');
+  }
+  return context;
+};

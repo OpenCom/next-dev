@@ -1,8 +1,12 @@
 // components/Sidebar.tsx
 import { Box, List, ListItem, ListItemText, Divider } from '@mui/material';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 const Sidebar = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.is_admin;
+
   return (
     <Box
       sx={{
@@ -13,20 +17,25 @@ const Sidebar = () => {
       }}
     >
       <List>
-        <ListItem as="button" component={Link} href="/trasferte">
+        <ListItem as="button" component={Link} href="/dashboard/trasferte">
           <ListItemText primary="Trasferte" />
         </ListItem>
-        <ListItem as="button" component={Link} href="/spesa">
+        <ListItem as="button" component={Link} href="/dashboard/spesa">
           <ListItemText primary="Spesa" />
         </ListItem>
-        <ListItem as="button" component={Link} href="/dipendenti">
-          <ListItemText primary="Dipendenti" />
-        </ListItem>
-        <ListItem as="button" component={Link} href="/report">
+        <ListItem as="button" component={Link} href="/dashboard/report">
           <ListItemText primary="Report" />
         </ListItem>
       </List>
       <Divider />
+      {
+        Boolean(isAdmin) && (
+          <List>
+            <ListItem as="button" component={Link} href="/admin/dipendenti">
+              <ListItemText primary="Dipendenti" />
+            </ListItem>
+          </List>
+        )}
     </Box>
   );
 };

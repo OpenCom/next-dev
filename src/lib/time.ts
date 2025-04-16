@@ -1,12 +1,13 @@
-export function getCurrentTimestamp(): string {
-  const currentDate = new Date();
-  const timestamp = currentDate.toLocaleString("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+export function getFormattedTimestampToDate(timestamp: string): string {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString('it-IT', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   });
-  return timestamp;
+}
+
+export function getCurrentTimestampMySQL(): string {
+  const now = new Date();
+  return now.toISOString().slice(0, 19).replace('T', ' ');
 }

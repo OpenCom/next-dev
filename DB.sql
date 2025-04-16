@@ -128,10 +128,9 @@ CREATE VIEW user_details AS
 SELECT 
     u.id_user, 
     d.id_dipendente,
-    u.username, 
+    d.nome, 
     d.email, 
     d.ruolo,
-    u.is_admin, 
-    u.is_active 
+    u.is_admin
 FROM users u
 JOIN dipendenti d ON u.id_dipendente = d.id_dipendente;

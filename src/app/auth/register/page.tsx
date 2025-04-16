@@ -1,11 +1,11 @@
 "use client";
 import React, { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { AuthFormDataType } from "@/types/auth";
+import { AuthFormDataType_Register } from "@/types/auth";
 
 export default function RegistrationForm() {
   const router = useRouter();
-  const [formData, setFormData] = React.useState<AuthFormDataType>({
+  const [formData, setFormData] = React.useState<AuthFormDataType_Register>({
     email: "",
     password: ""
   });
@@ -83,27 +83,6 @@ export default function RegistrationForm() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-
-        {/* <div className="mb-4">
-          <label
-            htmlFor="username"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            Username
-          </label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.email.slice(0, formData.email.indexOf('@'))}
-            //onChange={handleChange}
-            placeholder="Username generato a partire dalla mail"
-            required
-            disabled={true}
-            aria-disabled={true}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div> */}
 
         <div className="mb-4">
           <label
