@@ -1,20 +1,18 @@
-import { NextResponse } from "next/server";
-import type { NextApiRequest } from "next";
+import { NextResponse, NextRequest } from "next/server";
 import { executeQuery } from "@/lib/db";
 
-export async function GET(
-  req: NextApiRequest,
-  {
-    params,
-  }: { params: Promise<{ table: string; column: string; row: string }> }
-) {
-  if (req.method !== "GET") {
-    return NextResponse.json(
-      { message: "Metodo non consentito" },
-      { status: 405 }
-    );
+type CustomQueryURLParams = {
+  params: {
+    table: string;
+    column: string; 
+    row: string 
   }
-
+}
+export async function GET(
+    request: NextRequest,
+    { params }: CustomQueryURLParams
+  ) {
+    
   const { table, column, row } = await params;
   if (!table || !column || !row) {
     return NextResponse.json(
