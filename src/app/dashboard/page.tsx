@@ -11,14 +11,14 @@ export default function Dashboard() {
     const fetchData = async () => {
       const response = await fetch('/api/dashboard');
       const res = await response.json();
-      setData(res.results);
+      setData(res.data);
     };
     fetchData();
   }, []);
 
   return (
     <Wrapper onEdit={() => {}} onAdd={() => {}}>
-      <Summary totalTrasferte={data.totalTrasferte} totalSpese={data.totalSpese} />
+      <Summary totalTrasferte={data.totalTrasferte ?? 0} totalSpese={data.totalSpese ?? 0} />
       <Grid />
     </Wrapper>
   );

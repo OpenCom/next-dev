@@ -2,7 +2,7 @@ import { Box, Card, CardContent, Typography } from '@mui/material';
 
 const Summary = ({ totalTrasferte, totalSpese }: { totalTrasferte: number; totalSpese: number }) => {
   return (
-    <Box display="flex" gap={2}>
+    <Box display="flex" gap={2} sx={{my: 2}}>
       <Card sx={{ flexGrow: 1 }}>
         <CardContent>
           <Typography variant="h6">Totale Trasferte</Typography>
