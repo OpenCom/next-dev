@@ -11,7 +11,7 @@ type SpeseURLParams = {
 }
 
 
-async function checkSpesaPermission(spesa: SpesaType, user: any, uuid: string): Promise<boolean | NextResponse> {
+async function checkSpesaPermission(user: any, uuid: string): Promise<boolean | NextResponse> {
 
     // Verify that the user has permission to modify this spesa
     const checkQuery = `
@@ -51,11 +51,9 @@ export async function DELETE(
   try {
     // Verify authentication
     const user = requireAuth(request);
-    
     const { uuid } = await params;
-    const spesa: SpesaType = await request.json();
 
-    const permission = await checkSpesaPermission(spesa, user, uuid);
+    const permission = await checkSpesaPermission(user, uuid);
     if (!permission) {
       throw new Error('Non autorizzato');
     }
@@ -106,7 +104,7 @@ export async function PUT(
       );
     }
 
-    const permission = await checkSpesaPermission(spesa, user, uuid);
+    const permission = await checkSpesaPermission(user, uuid);
     if (!permission) {
       throw new Error('Non autorizzato');
     }

@@ -100,7 +100,7 @@ export const authOptions: NextAuthOptions = {
       // 'session.user' di default potrebbe avere solo { name, email, image }.
       if (token && session.user) { // Assicurati che session.user esista
         session.user.id = parseInt(token.id); // Assicurati che token.id sia un numero
-        session.user.id_dipendente = token.id_dipendente as any; // Specifica il tipo corretto se diverso da any
+        session.user.id_dipendente = token.id_dipendente as number;
         session.user.nome = token.nome as string;
         session.user.email = token.email as string; // Assicurati che token.email esista
         session.user.ruolo = token.ruolo as RuoloType;

@@ -27,24 +27,31 @@ import {
 } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
 import SubHeader from '@/components/global/SubHeader';
+import { formatDateForMySQL, parseMySQLDateString } from '@/lib/time';
+import { useSession } from 'next-auth/react';
+import CheckUserSessionWrapper from '@/components/common/checkUserSession';
+
 
 export default function TrasfertaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [trasferta, setTrasferta] = useState<TrasfertaWithDetails | null>(null);
   const [spese, setSpese] = useState<SpesaWithDetails[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [totalSpese, setTotalSpese] = useState(0);
   const [remainingBudget, setRemainingBudget] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Editable Spese DataGrid logic
   const [speseRows, setSpeseRows] = useState<SpesaWithDetails[]>(spese);
   const [speseRowModesModel, setSpeseRowModesModel] = useState<GridRowModesModel>({});
 
+  const { data: session } = useSession();
+  const user = session?.user;
+
   useEffect(() => {
     const fetchTrasferta = async () => {
       try {
-        const response = await fetch(`/api/trasferta/${id}`, {
+        const response = await fetch(`/api/trasferte/${id}`, {
           credentials: 'include'
         });
         if (!response.ok) {
@@ -95,7 +102,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
       }
 
       // Format the date to YYYY-MM-DD
-      const formattedDate = new Date(row.data_spesa).toISOString().split('T')[0];
+      const inputDate = row.data_spesa ? row.data_spesa : new Date().toISOString();
 
       // Create a SpesaType object with only the necessary fields
       const spesaToSave: SpesaType = {
@@ -104,7 +111,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
         id_trasferta: row.id_trasferta,
         id_categoria: row.id_categoria,
         id_dipendente: row.id_dipendente,
-        data_spesa: formattedDate,
+        data_spesa: formatDateForMySQL(inputDate)!,
         descrizione: row.descrizione,
         importo: typeof row.importo === 'string' ? parseFloat(row.importo) : row.importo,
         scontrino_url: row.scontrino_url || undefined,
@@ -113,6 +120,8 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
         created_at: row.created_at,
         updated_at: new Date().toISOString()
       };
+
+      console.log(JSON.stringify(spesaToSave, null, 2));
 
       // Make API call to save the data
       const response = await fetch(`/api/spesa/${row.uuid_spesa}`, {
@@ -133,16 +142,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
       setSpeseRowModesModel({ ...speseRowModesModel, [id]: { mode: GridRowModes.View } });
       
       // Refresh the spese data to ensure we have the latest from the server
-      const refreshResponse = await fetch(`/api/trasferta/${trasferta?.uuid_trasferta}`, {
-        credentials: 'include'
-      });
-      
-      if (!refreshResponse.ok) {
-        throw new Error('Failed to refresh data');
-      }
-      
-      const refreshData = await refreshResponse.json();
-      setSpese(refreshData.spese);
+      refreshSpese(row.id_trasferta, setSpese);
       
       // Show success message
       alert('Spesa salvata con successo');
@@ -187,7 +187,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
   };
 
   function SpeseEditToolbar(props: GridToolbarProps) {
-    const handleClick = () => {
+    const handleClick = async () => {
       const newId = Math.max(...speseRows.map(row => row.id_spesa), 0) + 1;
       const newRow: SpesaWithDetails = {
         id_spesa: newId, // Temporary ID, will be replaced by server
@@ -199,18 +199,47 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
         scontrino_url: '',
         id_categoria: 0,
         nome_categoria: '', // Will be populated by server
-        id_dipendente: 0,
+        id_dipendente: user!.id_dipendente,
         nome_dipendente: '', // Will be populated by server
         id_trasferta: parseInt(id),
         is_deleted: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
+
       setSpeseRows([...speseRows, newRow]);
       setSpeseRowModesModel((oldModel) => ({
         ...oldModel,
         [newId]: { mode: GridRowModes.Edit, fieldToFocus: 'descrizione' },
       }));
+
+      // Make API call to save the data
+      const response = await fetch(`/api/spesa/new`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          id_trasferta: parseInt(id),
+          id_dipendente: user!.id_dipendente,
+          id_categoria: newRow.id_categoria,
+          descrizione: newRow.descrizione,
+          importo: newRow.importo,
+          data_spesa: formatDateForMySQL(newRow.data_spesa)!,
+          stato_approvazione: newRow.stato_approvazione,
+          scontrino_url: newRow.scontrino_url,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Errore nella creazione della spesa');
+      }
+
+      // Refresh the spese data to ensure we have the latest from the server
+      refreshSpese(parseInt(id), setSpese);
+
     };
     return (
       <GridToolbarContainer>
@@ -226,7 +255,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
   const speseColumns: GridColDef[] = [
     { field: 'descrizione', headerName: 'Descrizione', flex: 2, editable: true },
     { field: 'importo', headerName: 'Importo', flex: 1, editable: true, type: 'number', valueFormatter: ({ value }) => valueFormatterCurrency(value) },
-    { field: 'data_spesa', headerName: 'Data', flex: 1, editable: true, valueFormatter: ({ value }) => valueFormatterDate(value) },
+    { field: 'data_spesa', headerName: 'Data', type: 'date', flex: 1, editable: true, valueFormatter: ({ value }) => parseMySQLDateString(value) },
     { field: 'stato_approvazione', headerName: 'Stato', flex: 1, editable: true, type: 'singleSelect', valueOptions: ['presentata', 'approvata', 'respinta'] },
     {
       field: 'actions',
@@ -324,6 +353,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
         ]}
       />
 
+      <CheckUserSessionWrapper>
       <Grid container spacing={3}>
         {/* Sidebar with trasferta info */}
         <Grid item xs={12} md={4}>
@@ -380,6 +410,23 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
           </Paper>
         </Grid>
       </Grid>
+      </CheckUserSessionWrapper>
     </Box>
   );
+} 
+
+
+async function refreshSpese(id_trasferta: number, setSpese: (spese: SpesaWithDetails[]) => void) {
+  // Refresh the spese data to ensure we have the latest from the server
+  const refreshResponse = await fetch(`/api/trasferte/${id_trasferta}`, {
+    credentials: 'include'
+  });
+
+  if (!refreshResponse.ok) {
+    throw new Error('Failed to refresh data');
+  }
+
+  const refreshData = await refreshResponse.json();
+  
+  setSpese(refreshData.spese);
 } 

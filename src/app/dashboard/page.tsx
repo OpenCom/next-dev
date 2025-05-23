@@ -6,6 +6,7 @@ import * as d3 from 'd3';
 import { useSession } from 'next-auth/react';
 import type { DashboardData } from '@/types';
 import { valueFormatterCurrency } from '@/lib/common';
+import CheckUserSessionWrapper from '@/components/common/checkUserSession';
 
 // Chart configuration types
 interface ChartConfig {
@@ -102,21 +103,7 @@ export default function DashboardPage() {
     });
   }, [data, session?.user?.is_admin]);
 
-  if (status === 'loading') {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (status === 'unauthenticated') {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="warning">Please log in to view the dashboard</Alert>
-      </Box>
-    );
-  }
+  if (!data) return null;
 
   if (error) {
     return (
@@ -126,14 +113,13 @@ export default function DashboardPage() {
     );
   }
 
-  if (!data) return null;
-
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Dashboard
       </Typography>
 
+      <CheckUserSessionWrapper>
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -205,6 +191,7 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
       </Grid>
+      </CheckUserSessionWrapper>
     </Box>
   );
 }
