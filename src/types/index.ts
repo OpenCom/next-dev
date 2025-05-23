@@ -93,7 +93,7 @@ export interface SpesaWithDetails extends Omit<SpesaType, 'importo' | 'scontrino
   nome_dipendente: string;
 }
 
-export interface NewSpesaWithDetails extends Omit<SpesaWithDetails, 'id_spesa' | 'uuid_spesa' | 'nome_categoria' | 'nome_dipendente'> {}
+export interface NewSpesa extends Omit<SpesaType, 'id_spesa' | 'uuid_spesa' | 'created_at'> {}
 
 export type SpesaConCategoria = {
   uuid_spesa: string;

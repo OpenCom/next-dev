@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Chip, Grid } from '@mui/material';
+import { MouseEventHandler, useEffect, useState } from 'react';
+import { Box, Typography, Paper, Chip, Grid2 as Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { use } from 'react';
 import SpeseGrid from '@/components/common/SpeseGrid';
 import { valueFormatterCurrency, valueFormatterDate } from '@/lib/common';
-import type { TrasfertaWithDetails, SpesaWithDetails, NewSpesaWithDetails } from '@/types';
-import type { SpesaType } from '@/types/db';
+import type { TrasfertaWithDetails, SpesaWithDetails } from '@/types';
+import type { SpesaType, CategoriaSpesaType } from '@/types/db';
 import Tooltip from '@mui/material/Tooltip';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -24,6 +24,7 @@ import {
   GridRowEditStopReasons,
   GridToolbarContainer,
   GridToolbarProps,
+  useGridApiRef,
 } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
 import SubHeader from '@/components/global/SubHeader';
@@ -40,17 +41,20 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
   const [remainingBudget, setRemainingBudget] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<CategoriaSpesaType[]>([]);
 
   // Editable Spese DataGrid logic
   const [speseRows, setSpeseRows] = useState<SpesaWithDetails[]>(spese);
   const [speseRowModesModel, setSpeseRowModesModel] = useState<GridRowModesModel>({});
+  const apiRef = useGridApiRef();
 
   const { data: session } = useSession();
   const user = session?.user;
 
   useEffect(() => {
-    const fetchTrasferta = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch trasferta and spese
         const response = await fetch(`/api/trasferte/${id}`, {
           credentials: 'include'
         });
@@ -60,6 +64,16 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
         const data = await response.json();
         setTrasferta(data.trasferta);
         setSpese(data.spese);
+
+        // Fetch categories
+        const categoriesResponse = await fetch('/api/categorie', {
+          credentials: 'include'
+        });
+        if (!categoriesResponse.ok) {
+          throw new Error('Errore nel recupero delle categorie');
+        }
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -67,7 +81,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
       }
     };
 
-    fetchTrasferta();
+    fetchData();
   }, [id]);
 
   // Calculate totals whenever spese or trasferta changes
@@ -86,6 +100,9 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
   const handleSpeseRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true;
+    } else if (params.reason === GridRowEditStopReasons.enterKeyDown) {
+      event.defaultMuiPrevented = true;
+      handleSpeseSaveClick(params.id)();
     }
   };
 
@@ -95,37 +112,47 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
 
   const handleSpeseSaveClick = (id: GridRowId) => async () => {
     try {
-      // Get the row being edited
-      const row = speseRows.find((row) => row.id_spesa === Number(id));
-      if (!row) {
+      // First, commit any pending changes
+      apiRef.current.stopRowEditMode({ id, ignoreModifications: false });
+
+      // Add a small delay to ensure changes are committed
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Get the current values from the editing row
+      const editingRow = apiRef.current.getRow(id);
+      if (!editingRow) {
         throw new Error('Row not found');
       }
 
       // Format the date to YYYY-MM-DD
-      const inputDate = row.data_spesa ? row.data_spesa : new Date().toISOString();
+      const inputDate = editingRow.data_spesa ? editingRow.data_spesa : new Date().toISOString();
+
+      // Determine if this is a new spesa or an update
+      const isNewSpesa = !editingRow.uuid_spesa;
 
       // Create a SpesaType object with only the necessary fields
       const spesaToSave: SpesaType = {
-        id_spesa: row.id_spesa,
-        uuid_spesa: row.uuid_spesa,
-        id_trasferta: row.id_trasferta,
-        id_categoria: row.id_categoria,
-        id_dipendente: row.id_dipendente,
+        id_spesa: isNewSpesa ? null : editingRow.id_spesa,
+        uuid_spesa: isNewSpesa ? null : editingRow.uuid_spesa,
+        id_trasferta: editingRow.id_trasferta,
+        id_categoria: editingRow.id_categoria,
+        id_dipendente: editingRow.id_dipendente,
         data_spesa: formatDateForMySQL(inputDate)!,
-        descrizione: row.descrizione,
-        importo: typeof row.importo === 'string' ? parseFloat(row.importo) : row.importo,
-        scontrino_url: row.scontrino_url || undefined,
-        stato_approvazione: row.stato_approvazione,
-        is_deleted: row.is_deleted,
-        created_at: row.created_at,
+        descrizione: editingRow.descrizione,
+        importo: typeof editingRow.importo === 'string' ? parseFloat(editingRow.importo) : editingRow.importo,
+        scontrino_url: editingRow.scontrino_url || undefined,
+        stato_approvazione: editingRow.stato_approvazione,
+        is_deleted: editingRow.is_deleted,
+        created_at: editingRow.created_at,
         updated_at: new Date().toISOString()
       };
 
-      console.log(JSON.stringify(spesaToSave, null, 2));
+      const endpoint = isNewSpesa ? '/api/spesa/new' : `/api/spesa/${editingRow.uuid_spesa}`;
+      const method = isNewSpesa ? 'POST' : 'PUT';
 
       // Make API call to save the data
-      const response = await fetch(`/api/spesa/${row.uuid_spesa}`, {
-        method: 'PUT',
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -134,18 +161,22 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to save spesa');
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`Failed to ${isNewSpesa ? 'create' : 'update'} spesa: ${response.status} ${response.statusText}`);
       }
 
-      // Update local state only after successful save
+      const responseData = await response.json();
+      console.log('Server response:', responseData);
+
+      // Update local state
       setSpeseRowModesModel({ ...speseRowModesModel, [id]: { mode: GridRowModes.View } });
       
       // Refresh the spese data to ensure we have the latest from the server
-      refreshSpese(row.id_trasferta, setSpese);
+      await refreshSpese(editingRow.id_trasferta, setSpese);
       
       // Show success message
-      alert('Spesa salvata con successo');
+      alert(`Spesa ${isNewSpesa ? 'creata' : 'salvata'} con successo`);
     } catch (error) {
       console.error('Error saving spesa:', error);
       alert(error instanceof Error ? error.message : 'Errore durante il salvataggio della spesa');
@@ -176,31 +207,37 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
     });
   };
 
-  const processSpeseRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow };
-    setSpeseRows(speseRows.map((row) => (row.id_spesa === newRow.id_spesa ? updatedRow as SpesaWithDetails : row)));
-    return updatedRow;
+  const processSpeseRowUpdate = async (newRow: GridRowModel) => {
+    try {
+      const updatedRow = { ...newRow };
+      setSpeseRows(speseRows.map((row) => (row.id_spesa === newRow.id_spesa ? updatedRow as SpesaWithDetails : row)));
+      return updatedRow;
+    } catch (error) {
+      console.error('Error updating row:', error);
+      return null;
+    }
   };
 
   const handleSpeseRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setSpeseRowModesModel(newRowModesModel);
   };
 
+
   function SpeseEditToolbar(props: GridToolbarProps) {
-    const handleClick = async () => {
+    const handleClick = () => {
       const newId = Math.max(...speseRows.map(row => row.id_spesa), 0) + 1;
       const newRow: SpesaWithDetails = {
         id_spesa: newId, // Temporary ID, will be replaced by server
         uuid_spesa: '', // Will be generated by server
         descrizione: '',
         importo: '0.00',
-        data_spesa: '',
+        data_spesa: new Date().toISOString(),
         stato_approvazione: 'presentata',
         scontrino_url: '',
-        id_categoria: 0,
-        nome_categoria: '', // Will be populated by server
+        id_categoria: categories[0].id_categoria,
+        nome_categoria: categories[0].nome,
         id_dipendente: user!.id_dipendente,
-        nome_dipendente: '', // Will be populated by server
+        nome_dipendente: user!.nome, 
         id_trasferta: parseInt(id),
         is_deleted: false,
         created_at: new Date().toISOString(),
@@ -212,34 +249,6 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
         ...oldModel,
         [newId]: { mode: GridRowModes.Edit, fieldToFocus: 'descrizione' },
       }));
-
-      // Make API call to save the data
-      const response = await fetch(`/api/spesa/new`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          id_trasferta: parseInt(id),
-          id_dipendente: user!.id_dipendente,
-          id_categoria: newRow.id_categoria,
-          descrizione: newRow.descrizione,
-          importo: newRow.importo,
-          data_spesa: formatDateForMySQL(newRow.data_spesa)!,
-          stato_approvazione: newRow.stato_approvazione,
-          scontrino_url: newRow.scontrino_url,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Errore nella creazione della spesa');
-      }
-
-      // Refresh the spese data to ensure we have the latest from the server
-      refreshSpese(parseInt(id), setSpese);
-
     };
     return (
       <GridToolbarContainer>
@@ -252,11 +261,76 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
     );
   }
 
+  function caricaScontrino(id_spesa: number) {
+    return () => alert('Funzione non implementata');
+    // npm i react-filepond
+  }
   const speseColumns: GridColDef[] = [
+    { 
+      field: 'id_categoria', 
+      headerName: 'Categoria', 
+      flex: 1, 
+      editable: true, 
+      type: 'singleSelect',
+      valueOptions: categories.map(cat => ({
+        value: cat.id_categoria,
+        label: cat.nome
+      })),
+      renderCell: (params) => {
+        const category = categories.find(cat => cat.id_categoria === params.value);
+        return category ? category.nome : '';
+      },
+      // valueSetter: (params) => {
+      //   const newValue = params.value;
+      //   return { ...params.row, id_categoria: newValue };
+      // }
+    },
     { field: 'descrizione', headerName: 'Descrizione', flex: 2, editable: true },
-    { field: 'importo', headerName: 'Importo', flex: 1, editable: true, type: 'number', valueFormatter: ({ value }) => valueFormatterCurrency(value) },
-    { field: 'data_spesa', headerName: 'Data', type: 'date', flex: 1, editable: true, valueFormatter: ({ value }) => parseMySQLDateString(value) },
-    { field: 'stato_approvazione', headerName: 'Stato', flex: 1, editable: true, type: 'singleSelect', valueOptions: ['presentata', 'approvata', 'respinta'] },
+    { 
+      field: 'importo', 
+      headerName: 'Importo', 
+      flex: 1, 
+      editable: true, 
+      type: 'number', 
+      renderCell: (params) => {
+        return valueFormatterCurrency(params.value);
+      }
+    },
+    { 
+      field: 'data_spesa', 
+      headerName: 'Data', 
+      type: 'date', 
+      flex: 1, 
+      editable: true, 
+      valueFormatter: ({ value }) => parseMySQLDateString(value),
+      renderCell: (params) => {
+        return formatDateForMySQL(params.value);
+      }
+    },
+    { 
+      field: 'stato_approvazione', 
+      headerName: 'Stato', 
+      flex: 1, 
+      editable: true, 
+      type: 'singleSelect', 
+      valueOptions: ['presentata', 'approvata', 'respinta'] 
+    },
+    {
+      field: 'scontrino_url',
+      headerName: 'Scontrino',
+      flex: 1,
+      editable: false,
+      renderCell: (params) => {
+        if (!params.value) return (
+          <button onClick={caricaScontrino(params.row.id_spesa)}>Carica</button>
+        );
+        return (
+          <a href={params.value} target="_blank" rel="noopener noreferrer">
+            Visualizza
+          </a>
+        );
+      }
+    },
     {
       field: 'actions',
       type: 'actions',
@@ -354,14 +428,14 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
       />
 
       <CheckUserSessionWrapper>
-      <Grid container spacing={3}>
-        {/* Sidebar with trasferta info */}
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, height: '100%' }}>
+      <Grid container spacing={2} sx={{ height: '100%' }}>
+        {/* Sidebar with trasferta info */} 
+        <Grid size={3}>
+          <>
             <Typography variant="h6" gutterBottom>
               Dettagli Trasferta
             </Typography>
-            <Box sx={{ height: 'calc(100% - 40px)' }}>
+            <Box sx={{ height: '100%' }}>
               <DataGrid
                 rows={trasfertaRows}
                 columns={trasfertaColumns}
@@ -381,17 +455,17 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
                 }}
               />
             </Box>
-          </Paper>
+          </>
         </Grid>
-
         {/* Main content with spese grid */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, height: 'calc(100vh - 200px)' }}>
+        <Grid size={9}>
+          <>
             <Typography variant="h6" gutterBottom>
               Spese
             </Typography>
             <Box sx={{ height: 'calc(100% - 40px)' }}>
               <DataGrid
+                apiRef={apiRef}
                 rows={speseRows.map((row) => ({ ...row, id: row.id_spesa }))}
                 columns={speseColumns}
                 editMode="row"
@@ -407,7 +481,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
                 }}
               />
             </Box>
-          </Paper>
+          </>
         </Grid>
       </Grid>
       </CheckUserSessionWrapper>

@@ -65,8 +65,8 @@ export type TrasfertaPartecipantiType = {
 }
 
 export type SpesaType = {
-    id_spesa: number
-    uuid_spesa: string
+    id_spesa: number | null
+    uuid_spesa: string | null
     id_trasferta: number
     id_categoria: number
     id_dipendente: number
@@ -76,8 +76,8 @@ export type SpesaType = {
     scontrino_url?: string
     stato_approvazione: 'presentata' | 'approvata' | 'respinta'
     is_deleted: boolean
-    created_at: string
-    updated_at: string
+    created_at: string | null
+    updated_at: string | null
 }
 
 export type ApprovazioneType = {

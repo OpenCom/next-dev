@@ -10,7 +10,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
       <ThemeProvider theme={theme}>
         <Box sx={{ flexGrow: 1 }}>
           <Header />
-          <Box sx={{ padding: '20px' }}>{children}</Box>
+          <Box sx={{ padding: '0 20px 20px 20px' }}>{children}</Box>
         </Box>
       </ThemeProvider>
       </>
