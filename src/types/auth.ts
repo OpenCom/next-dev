@@ -15,8 +15,8 @@ interface AuthFormDataType {
   password: string;
 }
 export interface AuthFormDataType_Login extends AuthFormDataType {
-  identifier: string;
-};
+  username: string;
+}
 
 export interface AuthFormDataType_Register extends AuthFormDataType {
   email: string;

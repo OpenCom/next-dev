@@ -3,11 +3,11 @@ import mysql from "mysql2/promise";
 const PORT = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306;
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'opencom_pdm',
   port: PORT,
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -90,5 +90,26 @@ export async function executeTransaction(
     if (connection) connection.release();
   }
 }
+
+
+// Helper function to safely execute queries
+export async function queryDatabase<T>(sql: string, params: any[] = []): Promise<T[]> {
+  let connection: mysql.PoolConnection | null = null;
+  try {
+      connection = await pool.getConnection();
+      const [results] = await connection.execute(sql, params);
+      // Type assertion needed here as execute can return different result types
+      return results as T[];
+  } catch (error) {
+      console.error("Database query error:", error);
+      // Re-throw or handle as needed
+      throw new Error("Failed to execute database query.");
+  } finally {
+      if (connection) {
+          connection.release(); // Always release the connection
+      }
+  }
+}
+
 
 export default pool;

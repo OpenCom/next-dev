@@ -18,7 +18,7 @@ const Sidebar = () => {
     >
       <List>
         <ListItem as="button" component={Link} href="/dashboard/trasferte">
-          <ListItemText primary="Trasferte" />
+          <Link href="/trasferte"><ListItemText primary="Trasferte" /></Link>
         </ListItem>
         <ListItem as="button" component={Link} href="/dashboard/spesa">
           <ListItemText primary="Spesa" />

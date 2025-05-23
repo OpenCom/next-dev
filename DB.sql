@@ -30,6 +30,7 @@ CREATE TABLE categorie_spese (
 
 CREATE TABLE trasferte (
     id_trasferta INT AUTO_INCREMENT PRIMARY KEY,
+    uuid_trasferta CHAR(36) NOT NULL DEFAULT (UUID()),
     id_progetto INT NOT NULL,
     luogo VARCHAR(255) NOT NULL,
     data_inizio DATE NOT NULL,
@@ -39,7 +40,8 @@ CREATE TABLE trasferte (
     motivo_viaggio TEXT,
     note TEXT,
     FOREIGN KEY (id_responsabile) REFERENCES dipendenti(id_dipendente),
-    FOREIGN KEY (id_progetto) REFERENCES progetti(id_progetto)
+    FOREIGN KEY (id_progetto) REFERENCES progetti(id_progetto),
+    UNIQUE KEY (uuid_trasferta)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabella di associazione per i partecipanti alla trasferta

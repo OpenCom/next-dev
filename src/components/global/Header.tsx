@@ -1,44 +1,55 @@
 'use client';
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem } from '@mui/material';
-import { useAuth } from '@/context/AuthContext';
-import { AccountCircle } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, Link } from '@mui/material';
+import { AccountCircle, Menu as MenuIcon } from '@mui/icons-material';
+import { useSession, signOut } from 'next-auth/react';
 
-const Header = ({ onEdit, onAdd }: { onEdit: () => void; onAdd: () => void }) => {
+const Header = () => {
 
-  const { isAuthenticated, logout, user } = useAuth();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { data: session, status } = useSession();
+  const [menuState, setMenuState] = React.useState<{
+    mainMenu: HTMLElement | null;
+    accountMenu: HTMLElement | null;
+  }>({
+    mainMenu: null,
+    accountMenu: null
+  });
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleMenu = (menuType: 'main' | 'account') => (event: React.MouseEvent<HTMLElement>) => {
+    setMenuState(prev => ({
+      ...prev,
+      [menuType === 'main' ? 'mainMenu' : 'accountMenu']: event.currentTarget
+    }));
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleClose = (menuType: 'main' | 'account') => {
+    setMenuState(prev => ({
+      ...prev,
+      [menuType === 'main' ? 'mainMenu' : 'accountMenu']: null
+    }));
   };
 
   return (
-    <AppBar  position="sticky">
+    <AppBar position="sticky" sx={{ padding: '0 20px' }}>
       <Toolbar>
         <Typography variant="h5" component="p" sx={{ flexGrow: 1 }}>
           PDM
         </Typography>
-        <Box>
-          { Boolean(isAuthenticated) ? (
-              <div>
+        <Box display="flex" justifyContent="flex-end" alignItems="center" width="100%">
+        <div>
                 <IconButton
                   size="large"
-                  aria-label="account of current user"
+                  aria-label="main menu"
                   aria-controls="menu-appbar"
                   aria-haspopup="true"
-                  onClick={handleMenu}
+                  onClick={handleMenu('main')}
                   color="inherit"
                 >
-                  <AccountCircle />
+                  <MenuIcon />
                 </IconButton>
                 <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorEl}
+                  id="main-menu-appbar"
+                  anchorEl={menuState.mainMenu}
                   anchorOrigin={{
                     vertical: 'top',
                     horizontal: 'right',
@@ -48,17 +59,59 @@ const Header = ({ onEdit, onAdd }: { onEdit: () => void; onAdd: () => void }) =>
                     vertical: 'top',
                     horizontal: 'right',
                   }}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
+                  open={Boolean(menuState.mainMenu)}
+                  onClose={() => handleClose('main')}
                 >
                   <Typography variant="overline" sx={{ padding: '0 16px' }}>
-                    Ciao, {user!.nome}
+                    Pagine
                   </Typography>
-                  <MenuItem onClick={handleClose}>Account</MenuItem>
+                  <MenuItem onClick={() => handleClose('main')}>
+                      <Link href="/trasferte">Trasferte</Link>
+                  </MenuItem>
+                  <MenuItem onClick={() => handleClose('main')}>
+                      <Link href="/dashboard">Dashboard</Link>
+                  </MenuItem>
+                </Menu>
+              </div>
+          { status === 'authenticated' ? (
+              <div>
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleMenu('account')}
+                  color="inherit"
+                >
+                  <AccountCircle />
+                </IconButton>
+                <Menu
+                  id="account-menu-appbar"
+                  anchorEl={menuState.accountMenu}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  open={Boolean(menuState.accountMenu)}
+                  onClose={() => handleClose('account')}
+                >
+                  <Typography variant="overline" sx={{ padding: '0 16px' }}>
+                    Ciao, {session.user?.nome}
+                  </Typography>
+                  <MenuItem onClick={() => handleClose('account')}>
+                    <Link href="/auth/account">Account</Link>
+                  </MenuItem>
                   <MenuItem onClick={() => {
-                    handleClose(); 
-                    logout();}
-                  }>Log Out</MenuItem>
+                    handleClose('account');
+                    signOut();
+                  }}>
+                    Log Out
+                  </MenuItem>
                 </Menu>
               </div>
           ) : (

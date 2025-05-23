@@ -1,26 +1,101 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { executeQuery } from '@/lib/db';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const query = `
-      SELECT
-          (SELECT COUNT(*) FROM trasferte) AS totalTrasferte,
-          (SELECT SUM(importo) FROM spese) AS totalSpese;
-    `;
+    const session = await getServerSession(authOptions);
 
-    const results = await executeQuery(query);
-    const data = results[0]; // Get the first (and only) row
-
-    // Handle potential null if spese table is empty or all importo are NULL
-    if (data && data.totalSpese === null) {
-        data.totalSpese = 0; // Set sum to 0 if it's null
+    if (!session) {
+      return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    return NextResponse.json({ data }, { status: 200 });
+    const userId = session.user.id_dipendente;
+    const isAdmin = session.user.is_admin;
 
+    // Base query for expenses
+    let query = `
+      SELECT 
+        t.id_trasferta,
+        t.budget,
+        s.importo,
+        s.stato_approvazione,
+        c.nome as categoria,
+        t.luogo as trasferta
+      FROM trasferte t
+      LEFT JOIN spese s ON t.id_trasferta = s.id_trasferta
+      LEFT JOIN categorie_spese c ON s.id_categoria = c.id_categoria
+      WHERE s.is_deleted = 0
+    `;
+
+    // Add user-specific filter for non-admin users
+    if (!isAdmin) {
+      query += ` AND (t.id_responsabile = ? OR s.id_dipendente = ?)`;
+    }
+
+    const params = isAdmin ? [] : [userId, userId];
+    const results = await executeQuery(query, params);
+
+    // Process results
+    const stats = {
+      totalSpese: 0,
+      totalBudget: 0,
+      speseByCategoria: [] as any[],
+      speseByTrasferta: [] as any[],
+      speseByStato: [] as any[],
+    };
+
+    const categoriaMap = new Map();
+    const trasfertaMap = new Map();
+    const statoMap = new Map();
+    const countedTripBudgets = new Set();
+
+    results.forEach((row: any) => {
+      // Calculate totals
+      stats.totalSpese += parseFloat(row.importo) || 0;
+      
+      // Only count budget once per trip
+      if (row.id_trasferta && !countedTripBudgets.has(row.id_trasferta)) {
+        stats.totalBudget += parseFloat(row.budget) || 0;
+        countedTripBudgets.add(row.id_trasferta);
+      }
+
+      // Aggregate by category
+      if (row.categoria) {
+        const current = categoriaMap.get(row.categoria) || { categoria: row.categoria, total: 0, count: 0 };
+        current.total += parseFloat(row.importo) || 0;
+        current.count++;
+        categoriaMap.set(row.categoria, current);
+      }
+
+      // Aggregate by trip
+      if (row.trasferta) {
+        const current = trasfertaMap.get(row.trasferta) || { trasferta: row.trasferta, total: 0, count: 0 };
+        current.total += parseFloat(row.importo) || 0;
+        current.count++;
+        trasfertaMap.set(row.trasferta, current);
+      }
+
+      // Aggregate by status (only for non-admin users)
+      if (!isAdmin && row.stato_approvazione) {
+        const current = statoMap.get(row.stato_approvazione) || { stato: row.stato_approvazione, total: 0, count: 0 };
+        current.total += parseFloat(row.importo) || 0;
+        current.count++;
+        statoMap.set(row.stato_approvazione, current);
+      }
+    });
+
+    // Convert maps to arrays
+    stats.speseByCategoria = Array.from(categoriaMap.values());
+    stats.speseByTrasferta = Array.from(trasfertaMap.values());
+    if (!isAdmin) {
+      stats.speseByStato = Array.from(statoMap.values());
+    }
+
+    return NextResponse.json({ stats, isAdmin });
   } catch (error) {
-    console.error("Database query failed:", error);
-    return NextResponse.json({ message: "Errore durante il recupero delle statistiche dal database." }, { status: 500 });
+    console.error('Dashboard API error:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

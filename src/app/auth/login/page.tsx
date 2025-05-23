@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { TextField, Button, Typography, Box, Link } from '@mui/material';
 import Alert from "@/components/ui/Alert";
 import { AuthFormDataType_Login } from "@/types/auth";
+import { signIn } from "next-auth/react";
 
 function LoginPage() {
   const searchParams = useSearchParams();
@@ -11,7 +12,7 @@ function LoginPage() {
   const router = useRouter();
 
   const [formData, setFormData] = React.useState<AuthFormDataType_Login>({
-    identifier: '',
+    username: '',
     password: '',
   });
   const [loading, setLoading] = React.useState(false);
@@ -30,33 +31,22 @@ function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ identifier: formData.identifier, password: formData.password }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-      
-      // Redirect to dashboard
-      router.push('/dashboard');
-      
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
-      console.error('Login error:', err);
-    } finally {
+
+    // Use NextAuth's signIn
+    const res = await signIn('credentials', {
+      redirect: false,
+      username: formData.username,
+      password: formData.password,
+    });
+
+    if (res?.error) {
+      setError(res.error === "CredentialsSignin" ? "Credenziali non valide" : res.error);
       setLoading(false);
+      return;
     }
+
+    // Success: redirect to dashboard
+    router.push('/dashboard');
   };
 
   return (
@@ -65,7 +55,7 @@ function LoginPage() {
       flexDirection="column" 
       alignItems="center" 
       justifyContent="center" 
-      minHeight="100vh" 
+      minHeight="80vh" 
       px={2}
     >
       <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
@@ -91,12 +81,12 @@ function LoginPage() {
         maxWidth="400px"
       >
         <TextField
-          label="Email o Username"
-          name="identifier"
-          id="identifier"
+          label="Username"
+          name="username"
+          id="username"
           onChange={handleChange} 
-          value={formData.identifier}
-          placeholder="nome.cognome@opecom-italy.org"
+          value={formData.username}
+          placeholder="nome.cognome"
           required
           fullWidth
         />

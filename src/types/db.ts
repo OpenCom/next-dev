@@ -4,8 +4,10 @@ export type DipendenteType = {
     nome: string
     cognome: string
     email: string
-    ruolo: 'responsabile' | 'dipendente' | 'contabile' | 'esterno'
+    ruolo: RuoloType
 }
+
+export type RuoloType = 'responsabile' | 'dipendente' | 'contabile' | 'esterno'
 
 export type UserType = {
     id_user: number
@@ -33,8 +35,20 @@ export type CategoriaSpesaType = {
     nome: string
 }
 
+export type SpesaConCategoria = {
+    uuid_spesa: string;
+    nome_trasferta: string;
+    nome_categoria: string;
+    descrizione: string;
+    data_spesa: string;
+    importo: number;
+    stato_approvazione: 'presentata' | 'approvata' | 'respinta';
+    scontrino_url: string | null;
+  };
+
 export type TrasfertaType = {
     id_trasferta: number
+    uuid_trasferta: string
     id_progetto: number
     luogo: string
     data_inizio: string
