@@ -13,14 +13,17 @@ DB_USER=il_tuo_user
 DB_PASSWORD=la_psw_del_tuo_db
 DB_NAME=il_nome_del_tuo_db
 DB_PORT=3306 # opzionale
+JWT_SECRET='<secret_per_token:https://jwtsecret.com/generate>'
 ```
 
 esempio:
 ```bash
-DB_HOST=sql.freedb.tech
-DB_USER=freedb_mydatabase
-DB_PASSWORD='password123'
-DB_NAME=freedb_myuser
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD='admin'
+DB_NAME=opencom_pdm
+DB_PORT=3306
+JWT_SECRET=931a4115f32f38acc2b8738b934c0028d64b1f92364598eb0daa2d5fa61c82d2c542eab001a233a9509c219d34bc51f48f2fea3273cb5c9268f92c1405e5bafe79fb0f8750520f21989011099d054490803ce88ea572980611263e084f3b78df0f63055dcf9d6c300ca619323ce985f007a36a368dd86d696110db4c1764562bf6464c6a0d8f084b93e8786a5ed4899643e56815b21f0f596dcc3b559f9c43fd245b51ac580ce9dbcfefac7e2e3716f7af0fcec74c9eb5a7544ba3e335ef10e0ed7a09ab6b6b03dae96285755b99cdb91e8017b1d11a6d6db6f296a4e23ff9c985f19d604dc0a08899515b1100656da12ae67b5a41f032e4e17d12e40feef637
 ```
 
 Installa i pacchetti node:
