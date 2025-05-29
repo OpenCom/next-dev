@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { queryDatabase } from '@/lib/db';
 import type { TrasfertaType } from '@/types/db';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
@@ -33,3 +35,45 @@ export async function GET(request: Request) {
     );
   }
 } 
+
+
+export async function POST(request: Request) {
+  // controlla che l'utente sia loggato
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Utente non autenticato" }, { status: 401 });
+  }
+
+  try {
+    const { luogo, data_inizio, data_fine, budget, motivo_viaggio, note, id_progetto, id_responsabile } = await request.json();
+
+    const sql = `
+      INSERT INTO trasferte (
+        uuid_trasferta,
+        luogo, 
+        data_inizio, 
+        data_fine, 
+        budget, 
+        motivo_viaggio, 
+        note, 
+        id_progetto, 
+        id_responsabile
+      )
+      VALUES (
+        UUID(),
+        ?, ?, ?, ?, ?, ?, ?, ?
+      );
+    `;
+
+    const result = await queryDatabase(sql, [luogo, data_inizio, data_fine, budget, motivo_viaggio, note, id_progetto, id_responsabile]);
+    
+    return NextResponse.json({ message: "Trasferta creata con successo" });
+
+  } catch (error) {
+    console.error("API Error creating business trip:", error);
+    return NextResponse.json(
+      { message: "Errore durante la creazione della trasferta." },
+      { status: 500 }
+    );
+  }
+}

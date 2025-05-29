@@ -1,6 +1,6 @@
 import { createTheme, alpha, getContrastRatio } from '@mui/material/styles';
 
-const themeBase = '#1a237e';
+const themeBase = '#7e1a30';
 const themeMain = alpha(themeBase, 0.7);
 
 export const theme = createTheme({

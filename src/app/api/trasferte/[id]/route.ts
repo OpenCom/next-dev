@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from '@/lib/db';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 type TrasferteURLParams = {
-  params: {
+  params: Promise<{
     id: string;
-  }
+  }>
 }
 
 /**
@@ -73,3 +75,35 @@ export async function GET(
     );
   }
 } 
+
+
+export async function PUT(request: NextRequest, { params }: TrasferteURLParams) {
+
+  const { id } = await params;
+  const data = await request.json();
+
+  // controlla che l'utente sia loggato
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ message: "Utente non autenticato" }, { status: 401 });
+  }
+
+  try {
+    const trasfertaQuery = `
+      UPDATE trasferte 
+      SET ? 
+      WHERE id_trasferta = ?
+    `;
+
+    const trasferta = await executeQuery(trasfertaQuery, [data, id]);
+
+    return NextResponse.json({ message: "Trasferta aggiornata con successo" }, { status: 200 });
+
+  } catch (error) {
+    console.error("Database query failed:", error);
+    return NextResponse.json(
+      { message: "Errore durante l'aggiornamento della trasferta." },
+      { status: 500 }
+    );
+  }
+}

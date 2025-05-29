@@ -23,7 +23,7 @@ export default function SubHeader({ pageType, title, breadcrumbs }: SubHeaderPro
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="h6" component="span" sx={{ fontWeight: 'bold' }}>
-          {pageType}
+          {pageType}: 
         </Typography>
         <Typography variant="h6" component="span" color="text.secondary">
           {title}

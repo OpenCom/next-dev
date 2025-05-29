@@ -2,11 +2,11 @@ import { NextResponse, NextRequest } from "next/server";
 import { executeQuery } from "@/lib/db";
 
 type CustomQueryURLParams = {
-  params: {
+  params: Promise<{
     table: string;
     column: string; 
     row: string 
-  }
+  }>
 }
 export async function GET(
     request: NextRequest,

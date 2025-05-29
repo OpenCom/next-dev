@@ -3,6 +3,7 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Menu, MenuItem, Link } from '@mui/material';
 import { AccountCircle, Menu as MenuIcon } from '@mui/icons-material';
 import { useSession, signOut } from 'next-auth/react';
+import Logo from '../brand/Logo';
 
 const Header = () => {
 
@@ -32,9 +33,7 @@ const Header = () => {
   return (
     <AppBar position="sticky" sx={{ padding: '0 20px' }}>
       <Toolbar>
-        <Typography variant="h5" component="p" sx={{ flexGrow: 1 }}>
-          PDM
-        </Typography>
+        <Logo />
         <Box display="flex" justifyContent="flex-end" alignItems="center" width="100%">
         <div>
                 <IconButton

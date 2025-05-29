@@ -1,19 +1,25 @@
 'use client';
 
-import { MouseEventHandler, useEffect, useState } from 'react';
-import { Box, Typography, Paper, Chip, Grid2 as Grid } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, Typography, Paper, Chip, Grid2 as Grid, Link } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { use } from 'react';
-import SpeseGrid from '@/components/common/SpeseGrid';
 import { valueFormatterCurrency, valueFormatterDate } from '@/lib/common';
 import type { TrasfertaWithDetails, SpesaWithDetails } from '@/types';
 import type { SpesaType, CategoriaSpesaType } from '@/types/db';
 import Tooltip from '@mui/material/Tooltip';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
+import {
+  Add as AddIcon, 
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Upload as UploadIcon,
+  ChevronRight as ChevronRightIcon,
+  MenuOpen as MenuOpenIcon,
+  ReceiptLong as ReceiptLongIcon,
+} from '@mui/icons-material/';
+
 import {
   GridRowModesModel,
   GridRowModes,
@@ -42,12 +48,11 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategoriaSpesaType[]>([]);
-
+  const [showDetails, setShowDetails] = useState(true);
   // Editable Spese DataGrid logic
   const [speseRows, setSpeseRows] = useState<SpesaWithDetails[]>(spese);
   const [speseRowModesModel, setSpeseRowModesModel] = useState<GridRowModesModel>({});
   const apiRef = useGridApiRef();
-
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -176,7 +181,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
       await refreshSpese(editingRow.id_trasferta, setSpese);
       
       // Show success message
-      alert(`Spesa ${isNewSpesa ? 'creata' : 'salvata'} con successo`);
+      // alert(`Spesa ${isNewSpesa ? 'creata' : 'salvata'} con successo`);
     } catch (error) {
       console.error('Error saving spesa:', error);
       alert(error instanceof Error ? error.message : 'Errore durante il salvataggio della spesa');
@@ -320,14 +325,17 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
       headerName: 'Scontrino',
       flex: 1,
       editable: false,
+      width: 50,
       renderCell: (params) => {
         if (!params.value) return (
-          <button onClick={caricaScontrino(params.row.id_spesa)}>Carica</button>
+          <Button onClick={caricaScontrino(params.row.id_spesa)} size="small" title="Carica scontrino" color="inherit" variant="text">
+            <UploadIcon />
+          </Button>
         );
         return (
-          <a href={params.value} target="_blank" rel="noopener noreferrer">
-            Visualizza
-          </a>
+          <Button variant="text" href={params.value} target="_blank" color="inherit" size="small" title="Apri scontrino in una nuova scheda">
+            <ReceiptLongIcon />
+          </Button>
         );
       }
     },
@@ -393,7 +401,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
     { id: 7, label: 'Totale Spese', value: valueFormatterCurrency(totalSpese) },
     { 
       id: 8, 
-      label: 'Budget Rimanente', 
+      label: 'Rimanente', 
       value: valueFormatterCurrency(remainingBudget),
       type: 'chip',
       color: remainingBudget >= 0 ? 'success' : 'error'
@@ -429,12 +437,17 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
 
       <CheckUserSessionWrapper>
       <Grid container spacing={2} sx={{ height: '100%' }}>
-        {/* Sidebar with trasferta info */} 
+        {/* Sidebar con info trasferta */} 
         <Grid size={3}>
           <>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" gutterBottom>
               Dettagli Trasferta
             </Typography>
+            <Button variant="text" color="inherit" size="small" startIcon={showDetails ? <MenuOpenIcon /> : <ChevronRightIcon />} title="Nascondi dettagli" onClick={() => setShowDetails(!showDetails)}>
+            </Button>
+            </Box>
+            {showDetails && (
             <Box sx={{ height: '100%' }}>
               <DataGrid
                 rows={trasfertaRows}
@@ -449,16 +462,29 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
                   '& .MuiDataGrid-cell': {
                     border: 'none',
                   },
+                  '& .MuiDataGrid-cell p': {
+                    textWrap: 'pretty',
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    wordWrap: 'break-word',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '100%',
+                    display: 'block',
+                    lineHeight: '1.2',
+                  },
                   '& .MuiDataGrid-columnHeaders': {
                     display: 'none',
                   },
+                  padding: 1,
                 }}
               />
             </Box>
+            )}
           </>
         </Grid>
-        {/* Main content with spese grid */}
-        <Grid size={9}>
+        {/* Griglia con le spese */}
+        <Grid size={showDetails ? 9 : 12}>
           <>
             <Typography variant="h6" gutterBottom>
               Spese

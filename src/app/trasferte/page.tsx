@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Typography, Paper, Button } from '@mui/material';
+import { AddCircle, Edit as EditIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
 import DataGridExportToolbar from '@/components/common/DataGridExportToolbar';
 import type { TrasfertaType } from '@/types/db';
 import { useSearchParams } from 'next/navigation';
 import { valueFormatterCurrency } from '@/lib/common';
-import Link from 'next/link';
+
 
 interface TrasfertaWithDetails extends TrasfertaType {
   nome_progetto: string;
@@ -64,26 +65,35 @@ const requiredColumns: GridColDef[] = [
   {
     field: 'luogo',
     headerName: 'Luogo',
-    width: 200
+    flex: 1,
   },
   {
     field: 'nome_progetto',
     headerName: 'Progetto',
-    width: 200
+    flex: 1,
   },
   {
     field: 'budget',
     headerName: 'Budget',
-    width: 130,
+    flex: 1,
     type: 'number',
     valueFormatter: valueFormatterCurrency
   },
   {
     field: 'actions',
     headerName: 'Azioni',
-    width: 130,
+    width: 200,
     renderCell: (params) => {
-      return <Link href={`trasferte/${params.row.id_trasferta}`}>Visualizza</Link>;
+      return (
+      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', alignItems: 'center', height: '100%' }}>
+        <Button href={`trasferte/${params.row.id_trasferta}`} variant="text" color="inherit" title="Visualizza dettagli" size='small' endIcon={<VisibilityIcon />}>
+          Vedi
+        </Button>
+        <Button href={`trasferte/${params.row.id_trasferta}/edit`} variant="text" color="inherit" size='small' title="Modifica dati" endIcon={<EditIcon />}>
+          Modifica 
+        </Button>
+      </Box>
+    );
     }
   }
 ];
@@ -135,9 +145,14 @@ export default function TrasfertePage() {
 
   return (
     <Box sx={{ height: '100%', width: '100%', p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Trasferte
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Trasferte
+        </Typography>
+          <Button href="/trasferte/add" variant="contained" color="primary" endIcon={<AddCircle />}>
+            Crea Trasferta
+          </Button>
+      </Box>
       <Paper sx={{ height: 'calc(100vh - 200px)', width: '100%' }}>
         <DataGrid
           rows={trasferte}

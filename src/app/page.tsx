@@ -1,24 +1,56 @@
-import Image from "next/image";
+'use client';
+import { Button, Typography } from "@mui/material";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function Home() {
+
+  // check if the user is logged in
+  const { status } = useSession();
+
+  const btnClasses = "rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44";
+  
+
   return (
     <div>
-      <main className="w-fit mx-auto flex flex-col gap-8 row-start-2 items-center sm:items-start">
+      <main className="w-fit mx-auto flex justify-center min-h-[calc(100vh-100px)] items-center">
+        {status === "unauthenticated" ? (
+          <div className="flex flex-col gap-4 items-center">
+          <Typography variant="h2" component="p" sx={{ flexGrow: 1 }}>
+            Effettua il login per accedere al sistema
+          </Typography>
+          <Button href="/auth/login" size="large" variant="contained" color="primary">
+            Login
+          </Button>
+          </div>
+        ) : (
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <Link
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] hover:text-white dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+            className={`${btnClasses} hover:bg-[#383838] hover:text-white`}
             href="/dashboard"
           >
             VAI ALLA DASHBOARD
           </Link>
           <Link
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
+            className={`${btnClasses} hover:bg-[#d9d9d9] hover:text-black`}
             href="/trasferte"
           >
             VISUALIZZA TRASFERTE
           </Link>
+          <Link
+            className={`${btnClasses} hover:bg-[#d9d9d9] hover:text-black`}
+            href="/trasferte/add"
+          >
+            CREA NUOVA TRASFERTA
+          </Link>
+          {/* <Link
+            className={`${btnClasses} hover:bg-[#d9d9d9] hover:text-black`}
+            href="/progetti/add"
+          >
+            CREA NUOVO PROGETTO
+          </Link> */}
         </div>
+        )}
       </main>
     </div>
   );

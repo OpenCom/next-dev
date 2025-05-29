@@ -17,9 +17,9 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, req) {
-        console.log("[AUTHORIZE] Tentativo di autorizzazione con:", credentials);
+        //console.log("[AUTHORIZE] Tentativo di autorizzazione con:", credentials);
         if (!credentials?.username || !credentials?.password) {
-          console.error("[AUTHORIZE] Username o password mancanti");
+          //console.error("[AUTHORIZE] Username o password mancanti");
           throw new Error('Username e password sono obbligatori');
         }
 
@@ -31,10 +31,10 @@ export const authOptions: NextAuthOptions = {
             WHERE u.username = ? AND u.is_active = 1
           `;
           const users = await executeQuery(query, [credentials.username]);
-          console.log("[AUTHORIZE] Utenti dal DB:", users);
+          //console.log("[AUTHORIZE] Utenti dal DB:", users);
 
           if (!users || (Array.isArray(users) && users.length === 0)) {
-            console.warn("[AUTHORIZE] Utente non trovato o array vuoto.");
+            //console.warn("[AUTHORIZE] Utente non trovato o array vuoto.");
             // Restituire null qui fa fallire il login senza reindirizzare alla pagina di errore
             // Se vuoi reindirizzare alla pagina di errore, lancia un errore.
             // throw new Error('Credenziali non valide - utente non trovato');
@@ -42,20 +42,28 @@ export const authOptions: NextAuthOptions = {
           }
 
           const userFromDb = Array.isArray(users) ? users[0] : users;
-          console.log("[AUTHORIZE] Utente trovato nel DB:", userFromDb);
+          //console.log("[AUTHORIZE] Utente trovato nel DB:", userFromDb);
 
           const isValid = await bcrypt.compare(credentials.password, userFromDb.password_hash);
-          console.log("[AUTHORIZE] Password valida:", isValid);
+          //console.log("[AUTHORIZE] Password valida:", isValid);
 
           if (!isValid) {
-            console.warn("[AUTHORIZE] Password non valida.");
+            // console.warn("[AUTHORIZE] Password non valida.");
             // throw new Error('Credenziali non valide - password errata');
             return null;
           }
 
+          // Update ultimo_accesso
+          const updateQuery = `
+            UPDATE users 
+            SET ultimo_accesso = CURRENT_TIMESTAMP 
+            WHERE username = ?
+          `;
+          await executeQuery(updateQuery, [credentials.username]);
+
           // Assicurati che i campi esistano e abbiano valori validi
           if (userFromDb.id_dipendente == null || !userFromDb.nome || !userFromDb.email) {
-             console.error("[AUTHORIZE] Dati utente mancanti o non validi dal DB:", userFromDb);
+             // console.error("[AUTHORIZE] Dati utente mancanti o non validi dal DB:", userFromDb);
              // throw new Error('Dati utente incompleti dal database.');
              return null;
           }
@@ -68,11 +76,11 @@ export const authOptions: NextAuthOptions = {
             ruolo: userFromDb.ruolo as RuoloType, // Assicurati che RuoloType sia corretto
             is_admin: Boolean(userFromDb.is_admin) // Converti in booleano esplicitamente
           };
-          console.log("[AUTHORIZE] Oggetto utente restituito:", userToReturn);
+          // console.log("[AUTHORIZE] Oggetto utente restituito:", userToReturn);
           return userToReturn;
 
         } catch (error) {
-          console.error("[AUTHORIZE] Errore durante l'autorizzazione:", error);
+          // console.error("[AUTHORIZE] Errore durante l'autorizzazione:", error);
           // Lanciare l'errore qui reindirizzerà alla pagina di errore configurata
           throw new Error('Errore interno durante l\'autorizzazione');
         }
@@ -81,7 +89,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account, profile, isNewUser }) {
-      console.log("[JWT CALLBACK] Input:", { token, user, account, isNewUser });
+      // console.log("[JWT CALLBACK] Input:", { token, user, account, isNewUser });
       // 'user' è l'oggetto restituito da 'authorize' e viene passato solo al primo login.
       if (user) {
         token.id = user.id; // Questo 'id' è quello che abbiamo mappato da id_dipendente

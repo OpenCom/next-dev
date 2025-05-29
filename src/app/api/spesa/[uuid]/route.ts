@@ -5,9 +5,9 @@ import { requireAuth } from '@/lib/auth-middleware';
 import { User } from "next-auth";
 
 type SpeseURLParams = {
-  params: {
+  params: Promise<{
     uuid: string;
-  }
+  }>
 }
 
 
