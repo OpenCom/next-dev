@@ -62,13 +62,16 @@ const Header = () => {
                   onClose={() => handleClose('main')}
                 >
                   <Typography variant="overline" sx={{ padding: '0 16px' }}>
-                    Pagine
+                    MENU
                   </Typography>
-                  <MenuItem onClick={() => handleClose('main')}>
+                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
+                      <Link href="/dashboard">Dashboard</Link>
+                  </MenuItem>
+                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
                       <Link href="/trasferte">Trasferte</Link>
                   </MenuItem>
-                  <MenuItem onClick={() => handleClose('main')}>
-                      <Link href="/dashboard">Dashboard</Link>
+                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
+                      <Link href="/progetti">Progetti</Link>
                   </MenuItem>
                 </Menu>
               </div>

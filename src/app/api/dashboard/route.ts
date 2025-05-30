@@ -22,10 +22,12 @@ export async function GET() {
         s.importo,
         s.stato_approvazione,
         c.nome as categoria,
-        t.luogo as trasferta
+        t.luogo as trasferta,
+        p.nome as progetto
       FROM trasferte t
       LEFT JOIN spese s ON t.id_trasferta = s.id_trasferta
       LEFT JOIN categorie_spese c ON s.id_categoria = c.id_categoria
+      LEFT JOIN progetti p ON t.id_progetto = p.id_progetto
       WHERE s.is_deleted = 0
     `;
 
@@ -44,13 +46,14 @@ export async function GET() {
       speseByCategoria: [] as any[],
       speseByTrasferta: [] as any[],
       speseByStato: [] as any[],
+      speseByProgetto: [] as any[],
     };
 
     const categoriaMap = new Map();
     const trasfertaMap = new Map();
     const statoMap = new Map();
     const countedTripBudgets = new Set();
-
+    const progettoMap = new Map();
     results.forEach((row: any) => {
       // Calculate totals
       stats.totalSpese += parseFloat(row.importo) || 0;
@@ -71,7 +74,12 @@ export async function GET() {
 
       // Aggregate by trip
       if (row.trasferta) {
-        const current = trasfertaMap.get(row.trasferta) || { trasferta: row.trasferta, total: 0, count: 0 };
+        const current = trasfertaMap.get(row.trasferta) || { 
+          trasferta: row.trasferta, 
+          progetto: row.progetto,
+          total: 0, 
+          count: 0 
+        };
         current.total += parseFloat(row.importo) || 0;
         current.count++;
         trasfertaMap.set(row.trasferta, current);
@@ -84,7 +92,15 @@ export async function GET() {
         current.count++;
         statoMap.set(row.stato_approvazione, current);
       }
-    });
+
+      // Aggregate by project
+      if (row.progetto) {
+        const current = progettoMap.get(row.progetto) || { progetto: row.progetto, total: 0, count: 0 };
+        current.total += parseFloat(row.importo) || 0;
+        current.count++;
+        progettoMap.set(row.progetto, current);
+      }
+    }); 
 
     // Convert maps to arrays
     stats.speseByCategoria = Array.from(categoriaMap.values());
@@ -92,6 +108,7 @@ export async function GET() {
     if (!isAdmin) {
       stats.speseByStato = Array.from(statoMap.values());
     }
+    stats.speseByProgetto = Array.from(progettoMap.values());
 
     return NextResponse.json({ stats, isAdmin });
   } catch (error) {

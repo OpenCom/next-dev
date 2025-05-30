@@ -39,16 +39,22 @@ export default function Home() {
           </Link>
           <Link
             className={`${btnClasses} hover:bg-[#d9d9d9] hover:text-black`}
+            href="/progetti"
+          >
+            VISUALIZZA PROGETTI
+          </Link>
+          <Link
+            className={`${btnClasses} hover:bg-[#d9d9d9] hover:text-black`}
             href="/trasferte/add"
           >
             CREA NUOVA TRASFERTA
           </Link>
-          {/* <Link
+          <Link
             className={`${btnClasses} hover:bg-[#d9d9d9] hover:text-black`}
             href="/progetti/add"
           >
             CREA NUOVO PROGETTO
-          </Link> */}
+          </Link>
         </div>
         )}
       </main>

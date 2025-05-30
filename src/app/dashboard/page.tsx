@@ -17,6 +17,19 @@ interface ChartConfig {
   title: string;
 }
 
+interface TrasfertaData {
+  trasferta: string;
+  progetto?: string;
+  total: number;
+  count: number;
+}
+
+interface ProgettoData {
+  progetto: string;
+  total: number;
+  count: number;
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const [data, setData] = useState<DashboardData | null>(null);
@@ -71,14 +84,14 @@ export default function DashboardPage() {
         data: data.stats.speseByTrasferta,
         labelKey: 'trasferta',
         valueKey: 'total',
-        title: 'Expenses by Trip'
+        title: 'Spese per trasferta'
       },
       {
-        selector: '.monthly-chart',
-        data: data.stats.speseByTrasferta,
-        labelKey: 'trasferta',
+        selector: '.project-chart',
+        data: data.stats.speseByProgetto,
+        labelKey: 'progetto',
         valueKey: 'total',
-        title: 'Monthly Expenses'
+        title: 'Spese per progetto'
       }
     ];
 
@@ -89,13 +102,13 @@ export default function DashboardPage() {
         data: data.stats.speseByStato,
         labelKey: 'stato',
         valueKey: 'total',
-        title: 'Expenses by Status'
+        title: 'Spese per stato approvazione'
       });
     }
 
     // Create charts
     chartConfigs.forEach(config => {
-      if (config.selector === '.monthly-chart') {
+      if (config.selector === '.project-chart') {
         createBarChart(config);
       } else {
         createPieChart(config);
@@ -123,9 +136,9 @@ export default function DashboardPage() {
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: data.stats.totalSpese > data.stats.totalBudget ? '#ffebee' : '#e8f5e9', color: data.stats.totalSpese > data.stats.totalBudget ? '#d32f2f' : '#388e3c' } }>
+          <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f9f9f9', color: '#3a3a3a' } }>
             <Typography variant="subtitle1" gutterBottom>
-              Total Expenses
+              Totale spese
             </Typography>
             <Typography variant="h5" fontWeight="bold">
               {valueFormatterCurrency(data.stats.totalSpese)}
@@ -135,7 +148,7 @@ export default function DashboardPage() {
         <Grid item xs={12} sm={6} md={3}>
           <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f9f9f9', color: '#3a3a3a' }}>
             <Typography variant="subtitle1" gutterBottom>
-              Total Budget
+              Budget totale
             </Typography>
             <Typography variant="h5" fontWeight="bold">
               {valueFormatterCurrency(data.stats.totalBudget)}
@@ -159,7 +172,7 @@ export default function DashboardPage() {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, height: 440 }}>
             <Typography variant="h6" gutterBottom>
-              Expenses by Category
+              Spese per categoria
             </Typography>
             <Box className="categoria-chart chart-container" sx={{ height: 360 }} />
           </Paper>
@@ -167,7 +180,7 @@ export default function DashboardPage() {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, height: 440 }}>
             <Typography variant="h6" gutterBottom>
-              Expenses by Trip
+              Spese per trasferta
             </Typography>
             <Box className="trasferta-chart chart-container" sx={{ height: 360 }} />
           </Paper>
@@ -176,7 +189,7 @@ export default function DashboardPage() {
           <Grid item xs={12} md={6}>
             <Paper sx={{ p: 2, height: 440 }}>
               <Typography variant="h6" gutterBottom>
-                Expenses by Status
+                Stato spese
               </Typography>
               <Box className="stato-chart chart-container" sx={{ height: 360 }} />
             </Paper>
@@ -185,9 +198,9 @@ export default function DashboardPage() {
         <Grid item xs={12}>
           <Paper sx={{ p: 2, height: 440 }}>
             <Typography variant="h6" gutterBottom>
-              Monthly Expenses
+              Spese per progetto
             </Typography>
-            <Box className="monthly-chart chart-container" sx={{ height: 360 }} />
+            <Box className="project-chart chart-container" sx={{ height: 360 }} />
           </Paper>
         </Grid>
       </Grid>
@@ -204,7 +217,7 @@ function createPieChart({ selector, data, labelKey, valueKey, title }: ChartConf
   const radius = Math.min(width, height) / 2 - 10;
 
   const color = d3.scaleOrdinal()
-    .range(["#90a4ae", "#b0bec5", "#cfd8dc", "#78909c", "#bdbdbd", "#607d8b", "#ececec", "#b0b0b0"]);
+    .range(["#b9d7ea", "#dccdee", "#ebe7c9", "#dce7e2", "#efdfe5", "#d9d9ed", "#e6cdc2", "#dcd7b8", "#c9e2ce", "#e3d4e1", "#a9c9d2", "#f4eaeb"]);
 
   const pie = d3.pie<any>()
     .value(d => d[valueKey])
@@ -251,7 +264,7 @@ function createPieChart({ selector, data, labelKey, valueKey, title }: ChartConf
 
   // Add legend
   const legend = svg.append('g')
-    .attr('transform', `translate(${radius + 20 - width / 2},${-height / 2 + 20})`);
+    .attr('transform', `translate(${-width/2},${-height / 2 + 20})`); // posizione della legenda
   pieData.forEach((d, i) => {
     legend.append('rect')
       .attr('x', 0)

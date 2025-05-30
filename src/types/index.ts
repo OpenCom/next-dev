@@ -191,6 +191,11 @@ export interface DashboardStats {
     total: number;
     count: number;
   }[];
+  speseByProgetto: {
+    progetto: string;
+    total: number;
+    count: number;
+  }[];
 }
 
 export interface DashboardData {
