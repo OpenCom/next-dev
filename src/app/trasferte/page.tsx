@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { AddCircle, Edit as EditIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
@@ -98,7 +98,7 @@ const requiredColumns: GridColDef[] = [
   }
 ];
 
-export default function TrasfertePage() {
+function TrasferteGrid() {
   const [trasferte, setTrasferte] = useState<TrasfertaWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -166,9 +166,9 @@ export default function TrasfertePage() {
             sorting: {
               sortModel: [{ field: 'data_inizio', sort: 'desc' }],
             },
-            columns: { // Add this to control column visibility
+            columns: {
                 columnVisibilityModel: {
-                    id_trasferta: false, // Hide the id_trasferta column
+                    id_trasferta: false,
                 },
             },
           }}
@@ -187,5 +187,13 @@ export default function TrasfertePage() {
         />
       </Paper>
     </Box>
+  );
+}
+
+export default function TrasfertePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TrasferteGrid />
+    </Suspense>
   );
 }

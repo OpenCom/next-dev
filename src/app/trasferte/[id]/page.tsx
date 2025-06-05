@@ -36,10 +36,12 @@ import SubHeader from '@/components/global/SubHeader';
 import { formatDateForMySQL, parseMySQLDateString } from '@/lib/time';
 import { useSession } from 'next-auth/react';
 import CheckUserSessionWrapper from '@/components/common/checkUserSession';
+import { useParams } from 'next/navigation';
 
 
-export default function TrasfertaPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function TrasfertaPage() {
+  const params = useParams();
+  const id = params.id as string;
   const [trasferta, setTrasferta] = useState<TrasfertaWithDetails | null>(null);
   const [spese, setSpese] = useState<SpesaWithDetails[]>([]);
   const [totalSpese, setTotalSpese] = useState(0);
@@ -327,7 +329,7 @@ export default function TrasfertaPage({ params }: { params: { id: string } }) {
       width: 50,
       renderCell: (params) => {
         if (!params.value) return (
-          <Button onClick={caricaScontrino(params.row.id_spesa)} size="small" title="Carica scontrino" color="inherit" variant="text">
+          <Button onClick={caricaScontrino} size="small" title="Carica scontrino" color="inherit" variant="text">
             <UploadIcon />
           </Button>
         );

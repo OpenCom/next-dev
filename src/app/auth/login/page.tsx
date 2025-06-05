@@ -1,12 +1,12 @@
 'use client';
-import React, { ChangeEvent, FormEvent } from "react";
+import React, { ChangeEvent, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from 'next/navigation'
 import { TextField, Button, Typography, Box, Link } from '@mui/material';
 import Alert from "@/components/ui/Alert";
 import { AuthFormDataType_Login } from "@/types/auth";
 import { signIn } from "next-auth/react";
 
-function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
   const router = useRouter();
@@ -26,7 +26,6 @@ function LoginPage() {
     }));
   };
   
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -114,4 +113,10 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}
