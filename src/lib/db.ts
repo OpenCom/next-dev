@@ -111,5 +111,4 @@ export async function queryDatabase<T>(sql: string, params: any[] = []): Promise
   }
 }
 
-
 export default pool;
