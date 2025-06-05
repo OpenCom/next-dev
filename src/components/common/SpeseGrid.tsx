@@ -2,7 +2,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Box, Paper } from '@mui/material';
 import DataGridExportToolbar from './DataGridExportToolbar';
 import { valueFormatterCurrency, valueFormatterDate } from '@/lib/common';
-import type { SpesaWithDetails, SpeseGridProps } from '@/types';
+import type { SpeseGridProps } from '@/types';
 
 const columns: GridColDef[] = [
   {

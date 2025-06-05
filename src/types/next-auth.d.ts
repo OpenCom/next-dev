@@ -1,6 +1,6 @@
 // next-auth.d.ts
 import { DefaultSession, DefaultUser } from "next-auth";
-import { JWT, DefaultJWT } from "next-auth/jwt";
+import { DefaultJWT } from "next-auth/jwt";
 import { RuoloType } from "@/types/db"; // Assicurati che il percorso sia corretto
 
 declare module "next-auth" {

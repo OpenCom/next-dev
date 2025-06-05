@@ -95,7 +95,7 @@ export async function PUT(request: NextRequest, { params }: TrasferteURLParams) 
       WHERE id_trasferta = ?
     `;
 
-    const trasferta = await executeQuery(trasfertaQuery, [data, id]);
+    executeQuery(trasfertaQuery, [data, id]);
 
     return NextResponse.json({ message: "Trasferta aggiornata con successo" }, { status: 200 });
 

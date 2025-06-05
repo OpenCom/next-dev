@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { JwtOptions, JwtPayload, AuthUserType, UserType, DipendenteType } from "@/types"; // Assicurati che questi tipi siano corretti
-import { NextAuthOptions, User as NextAuthUser } from "next-auth"; // Importa User da next-auth se necessario per type hinting
+import { JwtPayload} from "@/types";
+import { NextAuthOptions } from "next-auth"; 
 import CredentialsProvider from "next-auth/providers/credentials";
 import { executeQuery } from "./db";
 import { RuoloType } from "@/types/db";
@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) { //,req 
         //console.log("[AUTHORIZE] Tentativo di autorizzazione con:", credentials);
         if (!credentials?.username || !credentials?.password) {
           //console.error("[AUTHORIZE] Username o password mancanti");
@@ -80,8 +80,8 @@ export const authOptions: NextAuthOptions = {
           return userToReturn;
 
         } catch (error) {
-          // console.error("[AUTHORIZE] Errore durante l'autorizzazione:", error);
           // Lanciare l'errore qui reindirizzerà alla pagina di errore configurata
+          console.error("[AUTHORIZE] Errore durante l'autorizzazione:", error);
           throw new Error('Errore interno durante l\'autorizzazione');
         }
       }
@@ -89,10 +89,10 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account, profile, isNewUser }) {
-      // console.log("[JWT CALLBACK] Input:", { token, user, account, isNewUser });
+      console.log("[JWT CALLBACK] Input:", { token, user, account, isNewUser, profile });
       // 'user' è l'oggetto restituito da 'authorize' e viene passato solo al primo login.
       if (user) {
-        token.id = user.id; // Questo 'id' è quello che abbiamo mappato da id_dipendente
+        token.id = user.id; // Questo 'id' è che abbiamo mappato da id_dipendente
         token.id_dipendente = user.id_dipendente;
         token.nome = user.nome;
         token.email = user.email; // Assicurati che 'user' abbia 'email'
@@ -176,6 +176,7 @@ export function verifyToken(token: string): JwtPayload | null {
   try {
     return jwt.verify(token, JWT_SECRET) as JwtPayload;
   } catch (error) {
+    console.error("[VERIFY TOKEN] Errore durante la verifica del token:", error);
     return null; // Invalid token
   }
 }

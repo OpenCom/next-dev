@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       );
     `;
 
-    const result = await queryDatabase(sql, [nome, data_inizio, data_fine]);
+    queryDatabase(sql, [nome, data_inizio, data_fine]);
     
     return NextResponse.json({ message: "Progetto creato con successo" });
 

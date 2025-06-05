@@ -4,7 +4,7 @@ import type { TrasfertaType } from '@/types/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-export async function GET(request: Request) {
+export async function GET() { //request: Request
   try {
     const sql = `
       SELECT 
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       );
     `;
 
-    const result = await queryDatabase(sql, [luogo, data_inizio, data_fine, budget, motivo_viaggio, note, id_progetto, id_responsabile]);
+    queryDatabase(sql, [luogo, data_inizio, data_fine, budget, motivo_viaggio, note, id_progetto, id_responsabile]);
     
     return NextResponse.json({ message: "Trasferta creata con successo" });
 

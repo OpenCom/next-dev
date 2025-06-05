@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Button, Typography } from '@mui/material';
-import { AddCircle, Edit as EditIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
+import { AddCircle } from '@mui/icons-material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import type { ProgettoType } from '@/types/db';

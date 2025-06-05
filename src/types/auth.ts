@@ -22,7 +22,11 @@ export interface AuthFormDataType_Register extends AuthFormDataType {
   email: string;
 }
 
-export interface JwtOptions extends jwt.SignOptions {}
+export const JwtOptions: jwt.SignOptions = {
+  algorithm: 'HS256',
+  expiresIn: '1h'
+}
+
 export interface JwtPayload {
   user: AuthUserType;
   // exp: number;

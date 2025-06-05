@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Grid, Paper, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, Grid, Paper, Typography, Alert } from '@mui/material';
 import * as d3 from 'd3';
 import { useSession } from 'next-auth/react';
 import type { DashboardData } from '@/types';
@@ -17,18 +17,18 @@ interface ChartConfig {
   title: string;
 }
 
-interface TrasfertaData {
-  trasferta: string;
-  progetto?: string;
-  total: number;
-  count: number;
-}
+// interface TrasfertaData {
+//   trasferta: string;
+//   progetto?: string;
+//   total: number;
+//   count: number;
+// }
 
-interface ProgettoData {
-  progetto: string;
-  total: number;
-  count: number;
-}
+// interface ProgettoData {
+//   progetto: string;
+//   total: number;
+//   count: number;
+// }
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -209,7 +209,7 @@ export default function DashboardPage() {
   );
 }
 
-function createPieChart({ selector, data, labelKey, valueKey, title }: ChartConfig) {
+function createPieChart({ selector, data, labelKey, valueKey }: ChartConfig) {
   const container = document.querySelector(selector) as HTMLElement;
   if (!container) return;
   const width = container.offsetWidth || 400;
@@ -313,7 +313,7 @@ function createPieChart({ selector, data, labelKey, valueKey, title }: ChartConf
   });
 }
 
-function createBarChart({ selector, data, labelKey, valueKey, title }: ChartConfig) {
+function createBarChart({ selector, data, labelKey, valueKey }: ChartConfig) {
   const container = document.querySelector(selector) as HTMLElement;
   if (!container) return;
   const width = container.offsetWidth || 600;

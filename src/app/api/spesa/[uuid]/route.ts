@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from '@/lib/db';
 import type { SpesaType } from '@/types/db';
 import { requireAuth } from '@/lib/auth-middleware';
-import { User } from "next-auth";
+// import { User } from "next-auth";
 
 type SpeseURLParams = {
   params: Promise<{

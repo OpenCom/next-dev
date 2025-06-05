@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Chip, Grid2 as Grid, Link } from '@mui/material';
+import { Box, Typography, Chip, Grid2 as Grid } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { use } from 'react';
 import { valueFormatterCurrency, valueFormatterDate } from '@/lib/common';
 import type { TrasfertaWithDetails, SpesaWithDetails } from '@/types';
 import type { SpesaType, CategoriaSpesaType } from '@/types/db';
@@ -18,7 +17,7 @@ import {
   ChevronRight as ChevronRightIcon,
   MenuOpen as MenuOpenIcon,
   ReceiptLong as ReceiptLongIcon,
-} from '@mui/icons-material/';
+} from '@mui/icons-material';
 
 import {
   GridRowModesModel,
@@ -29,7 +28,7 @@ import {
   GridRowModel,
   GridRowEditStopReasons,
   GridToolbarContainer,
-  GridToolbarProps,
+  // GridToolbarProps,
   useGridApiRef,
 } from '@mui/x-data-grid';
 import Button from '@mui/material/Button';
@@ -39,8 +38,8 @@ import { useSession } from 'next-auth/react';
 import CheckUserSessionWrapper from '@/components/common/checkUserSession';
 
 
-export default function TrasfertaPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function TrasfertaPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const [trasferta, setTrasferta] = useState<TrasfertaWithDetails | null>(null);
   const [spese, setSpese] = useState<SpesaWithDetails[]>([]);
   const [totalSpese, setTotalSpese] = useState(0);
@@ -228,7 +227,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
   };
 
 
-  function SpeseEditToolbar(props: GridToolbarProps) {
+  function SpeseEditToolbar() { //props: GridToolbarProps
     const handleClick = () => {
       const newId = Math.max(...speseRows.map(row => row.id_spesa), 0) + 1;
       const newRow: SpesaWithDetails = {
@@ -266,7 +265,7 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
     );
   }
 
-  function caricaScontrino(id_spesa: number) {
+  function caricaScontrino() { //id_spesa: number
     return () => alert('Funzione non implementata');
     // npm i react-filepond
   }
@@ -349,13 +348,13 @@ export default function TrasfertaPage({ params }: { params: Promise<{ id: string
         const isInEditMode = speseRowModesModel[id]?.mode === GridRowModes.Edit;
         if (isInEditMode) {
           return [
-            <GridActionsCellItem icon={<SaveIcon />} label="Salva" onClick={handleSpeseSaveClick(id)} color="inherit" />, 
-            <GridActionsCellItem icon={<CancelIcon />} label="Annulla" onClick={handleSpeseCancelClick(id)} color="inherit" />
+            <GridActionsCellItem key="save-icon" icon={<SaveIcon />} label="Salva" onClick={handleSpeseSaveClick(id)} color="inherit" />, 
+            <GridActionsCellItem key="cancel-icon" icon={<CancelIcon />} label="Annulla" onClick={handleSpeseCancelClick(id)} color="inherit" />
           ];
         }
         return [
-          <GridActionsCellItem icon={<EditIcon />} label="Modifica" onClick={handleSpeseEditClick(id)} color="inherit" />, 
-          <GridActionsCellItem icon={<DeleteIcon />} label="Elimina" onClick={handleSpeseDeleteClick(id)} color="inherit" />
+          <GridActionsCellItem key="edit-icon" icon={<EditIcon />} label="Modifica" onClick={handleSpeseEditClick(id)} color="inherit" />, 
+          <GridActionsCellItem key="delete-icon" icon={<DeleteIcon />} label="Elimina" onClick={handleSpeseDeleteClick(id)} color="inherit" />
         ];
       },
     },
