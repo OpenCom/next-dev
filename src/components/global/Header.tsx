@@ -110,7 +110,10 @@ const Header = () => {
                   </MenuItem>
                   <MenuItem onClick={() => {
                     handleClose('account');
-                    signOut();
+                    signOut({ 
+                      callbackUrl: process.env.NEXT_PUBLIC_APP_URL || '/',
+                      redirect: true 
+                    });
                   }}>
                     Log Out
                   </MenuItem>

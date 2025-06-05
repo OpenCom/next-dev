@@ -129,14 +129,15 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/login',
-    error: '/auth/error', // Pagina per mostrare errori (es. credenziali errate se `authorize` lancia un errore)
+    error: '/auth/error',
+    signOut: '/auth/login', // Add this to ensure proper redirect after logout
   },
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 ore
+    maxAge: 24 * 60 * 60, // 24 hours
   },
-  secret: JWT_SECRET, // Cruciale per la strategia JWT
-  debug: process.env.NODE_ENV === 'development', // Abilita log dettagliati da NextAuth
+  secret: JWT_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };
 
 export async function verifyPassword(password: string, hashedPassword: string) {
