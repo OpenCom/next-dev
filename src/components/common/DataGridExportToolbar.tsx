@@ -238,14 +238,23 @@ const ExportToolbar: React.FC<DataGridExportToolbarProps> = ({
 function DataGridExportToolbar() {
   return (
     <GridToolbarContainer>
-      <GridToolbarExport />
-      <ExportToolbar 
-        fileName="spese_report"
-        exportAllRows={false}
-        showEmailOptions={true}
-      />
+      <DataGridExportToolbarInner fileName="pdm_spese_report" exportAllRows={false} showEmailOptions={true} />
     </GridToolbarContainer>
   );
 }
 
+function DataGridExportToolbarInner({ fileName, exportAllRows, showEmailOptions }: DataGridExportToolbarProps) {
+  return (
+    <>
+      <GridToolbarExport />
+      <ExportToolbar 
+        fileName={fileName}
+        exportAllRows={exportAllRows || false}
+        showEmailOptions={showEmailOptions || true}
+      />
+    </>
+  );
+}
+
+export { DataGridExportToolbarInner };
 export default DataGridExportToolbar;

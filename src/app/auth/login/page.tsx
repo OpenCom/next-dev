@@ -34,7 +34,7 @@ function LoginForm() {
     // Use NextAuth's signIn
     const res = await signIn('credentials', {
       redirect: false,
-      username: formData.username,
+      username: formData.username.trim(),
       password: formData.password,
     });
 

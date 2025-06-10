@@ -37,6 +37,7 @@ import { formatDateForMySQL, parseMySQLDateString } from '@/lib/time';
 import { useSession } from 'next-auth/react';
 import CheckUserSessionWrapper from '@/components/common/checkUserSession';
 import { useParams } from 'next/navigation';
+import { DataGridExportToolbarInner } from '@/components/common/DataGridExportToolbar';
 
 
 export default function TrasfertaPage() {
@@ -263,6 +264,7 @@ export default function TrasfertaPage() {
             Aggiungi
           </Button>
         </Tooltip>
+        <DataGridExportToolbarInner fileName={`report_trasferta_${trasferta.luogo}`} exportAllRows={false} showEmailOptions={true} />
       </GridToolbarContainer>
     );
   }
@@ -412,7 +414,7 @@ export default function TrasfertaPage() {
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
-        <Typography color="error">Error: {error}</Typography>
+        <Typography color="error">Errore: {error}</Typography>
       </Box>
     );
   }
@@ -420,7 +422,7 @@ export default function TrasfertaPage() {
   if (loading || !trasferta) {
     return (
       <Box sx={{ p: 3 }}>
-        <Typography>Loading...</Typography>
+        <Typography>Caricamento...</Typography>
       </Box>
     );
   }
@@ -439,7 +441,8 @@ export default function TrasfertaPage() {
       <CheckUserSessionWrapper>
       <Grid container spacing={2} sx={{ height: '100%' }}>
         {/* Sidebar con info trasferta */} 
-        <Grid size={3}>
+        <Grid size={{xs: 12, md: 4, lg: 3
+        }}>
           <>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" gutterBottom>
@@ -449,7 +452,7 @@ export default function TrasfertaPage() {
             </Button>
             </Box>
             {showDetails && (
-            <Box sx={{ height: '100%' }}>
+            <Box>
               <DataGrid
                 rows={trasfertaRows}
                 columns={trasfertaColumns}
@@ -485,7 +488,7 @@ export default function TrasfertaPage() {
           </>
         </Grid>
         {/* Griglia con le spese */}
-        <Grid size={showDetails ? 9 : 12}>
+        <Grid size={{xs: 12, md: showDetails ? 8 : 12, lg: showDetails ? 9 : 12}}>
           <>
             <Typography variant="h6" gutterBottom>
               Spese
@@ -501,6 +504,7 @@ export default function TrasfertaPage() {
                 onRowEditStop={handleSpeseRowEditStop}
                 processRowUpdate={processSpeseRowUpdate}
                 slots={{ toolbar: SpeseEditToolbar }}
+                checkboxSelection
                 disableRowSelectionOnClick
                 sx={{
                   '& .actions': { color: 'text.secondary' },
