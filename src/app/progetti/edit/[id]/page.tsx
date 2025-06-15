@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDateForMySQL } from '@/lib/time';
 import { TextField, Button, Box, Typography, Paper, Alert } from '@mui/material';
@@ -9,17 +9,19 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { ProgettoType } from '@/types/db';
-import React from 'react';
+import { useParams } from 'next/navigation';
 
+export default function EditProgetto() {
 
-export default function EditProgetto({ params }: { params: { id_progetto: string } }) {
-  const { id_progetto } = params;
+  const params = useParams();
+  const id = params.id as string;
+
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ProgettoType>({
-    id_progetto: parseInt(id_progetto),
-    nome: 'Caricamento...',
+    id_progetto: parseInt(id),
+    nome: '',
     acronimo: '',
     codice_progetto: '',
     centro_costo: '',
@@ -43,14 +45,14 @@ export default function EditProgetto({ params }: { params: { id_progetto: string
       }
 
       const response = await fetch('/api/progetti', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
-          data_inizio: formatDateForMySQL(formData.data_inizio.toDate()),
-          data_fine: formatDateForMySQL(formData.data_fine.toDate()),
+          data_inizio: formatDateForMySQL(dayjs(formData.data_inizio).toDate()),
+          data_fine: formatDateForMySQL(dayjs(formData.data_fine).toDate()),
         }),
       });
 
@@ -79,13 +81,16 @@ export default function EditProgetto({ params }: { params: { id_progetto: string
   };
 
   React.useEffect(() => {
-    const fetchProgetti = async () => {
-        const response = await fetch(`/api/progetti/${id_progetto}`);
+    if (id) {
+    const fetchProgetto = async () => {
+        const response = await fetch(`/api/progetti?id=${id}`);
         const data = await response.json();
-        setFormData(data.res[0]);
-    };
-    fetchProgetti();
-    }, []);
+        console.log(data);
+        setFormData({...data[0], data_inizio: dayjs(data[0].data_inizio), data_fine: dayjs(data[0].data_fine)});
+        };
+        fetchProgetto();
+    }
+  }, [id]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -165,7 +170,7 @@ export default function EditProgetto({ params }: { params: { id_progetto: string
                   variant="contained"
                   disabled={loading}
                 >
-                  {loading ? 'Creazione in corso...' : 'Aggiungi Progetto'}
+                  {loading ? 'Modifica in corso...' : 'Modifica Progetto'}
                 </Button>
               </Box>
             </Box>

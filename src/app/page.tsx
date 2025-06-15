@@ -13,7 +13,7 @@ export default function Home() {
 
   return (
     <div>
-      <main className="w-fit mx-auto flex justify-center min-h-[calc(100vh-100px)] items-center">
+      <main className="w-fit mx-auto flex justify-center min-h-[calc(100vh-100px)] items-center flex-col">
         {status === "unauthenticated" ? (
           <div className="flex flex-col gap-4 items-center">
           <Typography variant="h2" component="p" sx={{ flexGrow: 1 }}>
@@ -24,13 +24,8 @@ export default function Home() {
           </Button>
           </div>
         ) : (
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <Link
-            className={`${btnClasses} hover:bg-[#383838] hover:text-white`}
-            href="/dashboard"
-          >
-            VAI ALLA DASHBOARD
-          </Link>
+        <>
+        <div className="flex gap-4 items-center flex-col sm:flex-row w-full">
           <Link
             className={`${btnClasses} hover:bg-[#d9d9d9] hover:text-black`}
             href="/trasferte"
@@ -56,6 +51,15 @@ export default function Home() {
             CREA NUOVO PROGETTO
           </Link>
         </div>
+        <div className="flex justify-center mt-4 w-full">
+          <Link
+            className={`${btnClasses} hover:bg-[#383838] hover:text-white`}
+            href="/report"
+          >
+            VEDI REPORT
+          </Link>
+        </div>
+        </>
         )}
       </main>
     </div>

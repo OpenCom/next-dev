@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Button, Typography } from '@mui/material';
-import { AddCircle } from '@mui/icons-material';
+import { AddCircle, Edit } from '@mui/icons-material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import type { ProgettoType } from '@/types/db';
@@ -16,8 +16,8 @@ export default function ProgettiPage() {
         {
           field: 'id_progetto',
           headerName: 'ID',
-          width: 90,
-          hideable: false
+          width: 60,
+          hideable: true
         },
         {
           field: 'nome',
@@ -28,16 +28,19 @@ export default function ProgettiPage() {
           field: 'acronimo',
           headerName: 'Acronimo',
           flex: 1,
+          width: 80,
         },
         {
           field: 'codice_progetto',
           headerName: 'Codice Progetto',
           flex: 1,
+          width: 200,
         },
         {
           field: 'centro_costo',
           headerName: 'Centro Costo',
           flex: 1,
+          width: 100,
         },
         {
           field: 'data_inizio',
@@ -55,6 +58,20 @@ export default function ProgettiPage() {
           valueFormatter: ({ value }) => parseMySQLDateString(value),
           renderCell: (params) => {
             return formatDateForMySQL(params.value);
+          }
+        },
+        {
+          field: 'actions',
+          headerName: 'Azioni',
+          width: 150,
+          renderCell: (params) => {
+            return (
+              <div>
+                <Button href={`/progetti/edit/${params.row.id_progetto}`} variant="text" color="inherit" size='small' endIcon={<Edit />}>
+                  Modifica
+                </Button>
+              </div>
+            );
           }
         }
     ]
@@ -82,11 +99,11 @@ export default function ProgettiPage() {
             <DataGrid
                 rows={rows.map((row) => ({ ...row, id: row.id_progetto }))}
                 columns={columns}
-                disableColumnMenu
-                disableColumnFilter
-                disableColumnSelector
-                disableDensitySelector
-                disableRowSelectionOnClick
+                // disableColumnMenu
+                // disableColumnFilter
+                // disableColumnSelector
+                // disableDensitySelector
+                // disableRowSelectionOnClick
                 pageSizeOptions={[10, 25, 50]}
                 initialState={{
                     pagination: { paginationModel: { pageSize: 10 } }
