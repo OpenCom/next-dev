@@ -1,3 +1,5 @@
+import dayjs from "dayjs"
+
 export type DipendenteType = {
     id_dipendente: number
     id_dipartimento: number
@@ -26,8 +28,11 @@ export type UserType = {
 export type ProgettoType = {
     id_progetto: number
     nome: string
-    data_inizio: string
-    data_fine?: string
+    acronimo: string
+    codice_progetto: string
+    centro_costo: string
+    data_inizio: dayjs.Dayjs | string
+    data_fine?: dayjs.Dayjs | string
 }
 
 export type CategoriaSpesaType = {

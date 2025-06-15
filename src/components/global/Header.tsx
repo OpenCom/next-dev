@@ -65,13 +65,13 @@ const Header = () => {
                     MENU
                   </Typography>
                   <MenuItem color='inherit' onClick={() => handleClose('main')}>
-                      <Link href="/dashboard">Dashboard</Link>
-                  </MenuItem>
-                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
                       <Link href="/trasferte">Trasferte</Link>
                   </MenuItem>
                   <MenuItem color='inherit' onClick={() => handleClose('main')}>
                       <Link href="/progetti">Progetti</Link>
+                  </MenuItem>
+                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
+                      <Link href="/report">Report</Link>
                   </MenuItem>
                 </Menu>
               </div>

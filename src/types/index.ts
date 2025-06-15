@@ -172,8 +172,8 @@ export class DatabaseError extends Error {
   }
 }
 
-// Dashboard Types
-export interface DashboardStats {
+// Report Types
+export interface ReportStats {
   totalSpese: number;
   totalBudget: number;
   speseByCategoria: {
@@ -198,8 +198,8 @@ export interface DashboardStats {
   }[];
 }
 
-export interface DashboardData {
-  stats: DashboardStats;
+export interface ReportData {
+  stats: ReportStats;
   isAdmin: boolean;
 }
 

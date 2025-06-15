@@ -19,6 +19,9 @@ CREATE TABLE dipendenti (
 CREATE TABLE progetti (
     id_progetto INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
+    acronimo VARCHAR(50) NOT NULL,
+    codice_progetto VARCHAR(255) NOT NULL,
+    centro_costo VARCHAR(255) NOT NULL,
     data_inizio DATE NOT NULL,
     data_fine DATE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Grid, Paper, Typography, Alert } from '@mui/material';
+import { Box, Grid2 as Grid, Paper, Typography, Alert } from '@mui/material';
 import * as d3 from 'd3';
 import { useSession } from 'next-auth/react';
-import type { DashboardData } from '@/types';
+import type { ReportData } from '@/types';
 import { valueFormatterCurrency } from '@/lib/common';
 import CheckUserSessionWrapper from '@/components/common/checkUserSession';
 
@@ -30,15 +30,15 @@ interface ChartConfig {
 //   count: number;
 // }
 
-export default function DashboardPage() {
+export default function ReportPage() {
   const { data: session, status } = useSession();
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<ReportData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/dashboard', {
+        const response = await fetch('/api/report', {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -49,7 +49,7 @@ export default function DashboardPage() {
           if (response.status === 401) {
             throw new Error('Unauthorized: Please log in');
           }
-          throw new Error('Failed to fetch dashboard data');
+          throw new Error('Failed to fetch report data');
         }
         
         const data = await response.json();
@@ -129,13 +129,13 @@ export default function DashboardPage() {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Dashboard
+        Report
       </Typography>
 
       <CheckUserSessionWrapper>
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f9f9f9', color: '#3a3a3a' } }>
             <Typography variant="subtitle1" gutterBottom>
               Totale spese
@@ -145,7 +145,7 @@ export default function DashboardPage() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#f9f9f9', color: '#3a3a3a' }}>
             <Typography variant="subtitle1" gutterBottom>
               Budget totale
@@ -155,7 +155,7 @@ export default function DashboardPage() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <Paper sx={{ p: 2, textAlign: 'center', bgcolor: data.stats.totalBudget - data.stats.totalSpese > 0 ? '#e8f5e9' : '#ffebee', color: data.stats.totalBudget - data.stats.totalSpese > 0 ? '#388e3c' : '#d32f2f' }}>
           <Typography variant="subtitle1" gutterBottom>
             Rimanente
@@ -169,7 +169,7 @@ export default function DashboardPage() {
 
       {/* Charts */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2, height: 440 }}>
             <Typography variant="h6" gutterBottom>
               Spese per categoria
@@ -177,7 +177,7 @@ export default function DashboardPage() {
             <Box className="categoria-chart chart-container" sx={{ height: 360 }} />
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2, height: 440 }}>
             <Typography variant="h6" gutterBottom>
               Spese per trasferta
@@ -186,7 +186,7 @@ export default function DashboardPage() {
           </Paper>
         </Grid>
         {!session?.user?.is_admin && (
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 2, height: 440 }}>
               <Typography variant="h6" gutterBottom>
                 Stato spese
@@ -195,7 +195,7 @@ export default function DashboardPage() {
             </Paper>
           </Grid>
         )}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Paper sx={{ p: 2, height: 440 }}>
             <Typography variant="h6" gutterBottom>
               Spese per progetto

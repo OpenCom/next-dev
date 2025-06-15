@@ -25,6 +25,21 @@ export default function ProgettiPage() {
           flex: 1,
         },
         {
+          field: 'acronimo',
+          headerName: 'Acronimo',
+          flex: 1,
+        },
+        {
+          field: 'codice_progetto',
+          headerName: 'Codice Progetto',
+          flex: 1,
+        },
+        {
+          field: 'centro_costo',
+          headerName: 'Centro Costo',
+          flex: 1,
+        },
+        {
           field: 'data_inizio',
           headerName: 'Data Inizio',
           width: 150,

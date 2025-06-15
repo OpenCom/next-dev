@@ -264,7 +264,7 @@ export default function TrasfertaPage() {
             Aggiungi
           </Button>
         </Tooltip>
-        <DataGridExportToolbarInner fileName={`report_trasferta_${trasferta.luogo}`} exportAllRows={false} showEmailOptions={true} />
+        <DataGridExportToolbarInner fileName={`report_trasferta_${trasferta?.luogo || 'trasferta'}`} exportAllRows={false} showEmailOptions={true} />
       </GridToolbarContainer>
     );
   }

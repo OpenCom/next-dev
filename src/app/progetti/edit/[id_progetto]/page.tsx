@@ -9,15 +9,17 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { ProgettoType } from '@/types/db';
+import React from 'react';
 
 
-export default function CreaProgetto() {
+export default function EditProgetto({ params }: { params: { id_progetto: string } }) {
+  const { id_progetto } = params;
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ProgettoType>({
-    id_progetto: 0,
-    nome: '',
+    id_progetto: parseInt(id_progetto),
+    nome: 'Caricamento...',
     acronimo: '',
     codice_progetto: '',
     centro_costo: '',
@@ -47,8 +49,8 @@ export default function CreaProgetto() {
         },
         body: JSON.stringify({
           ...formData,
-          data_inizio: formatDateForMySQL(dayjs(formData.data_inizio).toDate()),
-          data_fine: formatDateForMySQL(dayjs(formData.data_fine).toDate()),
+          data_inizio: formatDateForMySQL(formData.data_inizio.toDate()),
+          data_fine: formatDateForMySQL(formData.data_fine.toDate()),
         }),
       });
 
@@ -76,12 +78,21 @@ export default function CreaProgetto() {
     }));
   };
 
+  React.useEffect(() => {
+    const fetchProgetti = async () => {
+        const response = await fetch(`/api/progetti/${id_progetto}`);
+        const data = await response.json();
+        setFormData(data.res[0]);
+    };
+    fetchProgetti();
+    }, []);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
         <Paper sx={{ p: 4 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Nuovo Progetto
+           Progetto {formData.nome}
           </Typography>
 
           {error && (
