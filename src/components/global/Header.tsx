@@ -61,18 +61,26 @@ const Header = () => {
                   open={Boolean(menuState.mainMenu)}
                   onClose={() => handleClose('main')}
                 >
-                  <Typography variant="overline" sx={{ padding: '0 16px' }}>
-                    MENU
-                  </Typography>
-                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
-                      <Link href="/trasferte">Trasferte</Link>
-                  </MenuItem>
-                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
-                      <Link href="/progetti">Progetti</Link>
-                  </MenuItem>
-                  <MenuItem color='inherit' onClick={() => handleClose('main')}>
-                      <Link href="/report">Report</Link>
-                  </MenuItem>
+                  { status === 'authenticated' ? (
+                    <>
+                      <Typography variant="overline" sx={{ padding: '0 16px' }}>
+                      MENU
+                    </Typography>
+                    <MenuItem color='inherit' onClick={() => handleClose('main')}>
+                        <Link href="/trasferte">Trasferte</Link>
+                    </MenuItem>
+                    <MenuItem color='inherit' onClick={() => handleClose('main')}>
+                        <Link href="/progetti">Progetti</Link>
+                    </MenuItem>
+                    <MenuItem color='inherit' onClick={() => handleClose('main')}>
+                        <Link href="/report">Report</Link>
+                    </MenuItem>
+                    </>
+                  ) : (
+                    <MenuItem color='inherit' onClick={() => handleClose('main')}>
+                      <Link href="/auth/login">Login</Link>
+                    </MenuItem>
+                  )}
                 </Menu>
               </div>
           { status === 'authenticated' ? (

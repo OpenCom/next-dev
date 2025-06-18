@@ -14,16 +14,7 @@ export default function Home() {
   return (
     <div>
       <main className="w-fit mx-auto flex justify-center min-h-[calc(100vh-100px)] items-center flex-col">
-        {status === "unauthenticated" ? (
-          <div className="flex flex-col gap-4 items-center">
-          <Typography variant="h2" component="p" sx={{ flexGrow: 1 }}>
-            Effettua il login per accedere al sistema
-          </Typography>
-          <Button href="/auth/login" size="large" variant="contained" color="primary">
-            Login
-          </Button>
-          </div>
-        ) : (
+        {status === "authenticated" ? (
         <>
         <div className="flex gap-4 items-center flex-col sm:flex-row w-full">
           <Link
@@ -60,6 +51,15 @@ export default function Home() {
           </Link>
         </div>
         </>
+        ) : (
+          <div className="flex flex-col gap-4 items-center">
+          <Typography variant="h2" component="p" sx={{ flexGrow: 1 }}>
+            Effettua il login per accedere al sistema
+          </Typography>
+          <Button href="/auth/login" size="large" variant="contained" color="primary">
+            Login
+          </Button>
+          </div>
         )}
       </main>
     </div>
